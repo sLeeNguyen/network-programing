@@ -1,8 +1,8 @@
 package view;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -193,7 +193,6 @@ public class ViewManager {
                     GamePlay gameManager = new GamePlay();
                     gameManager.createNewGame(mainStage, choosenShip);
                 }
-
             }
         });
     }
@@ -215,15 +214,13 @@ public class ViewManager {
             sp.setOnMouseClicked(new EventHandler<MouseEvent>() {
                
             	public void handle(MouseEvent event) {
-                    Iterator var3 = shipPickers.iterator();
-
-                    while(var3.hasNext()) {
-                        ShipPicker ship = (ShipPicker)var3.next();
-                        ship.setCircleChoosen(false);
-                    }
+            		
+            		for (ShipPicker sp: shipPickers) {
+            			sp.setCircleChoosen(false);
+            		}
 
                     sp.setCircleChoosen(true);
-                    choosenShip = sp.getShip();
+                    choosenShip = new Ship(sp.getSHIP().getUrlShip());
                 }
             });
         }

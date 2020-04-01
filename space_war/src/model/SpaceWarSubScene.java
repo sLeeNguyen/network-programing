@@ -19,10 +19,13 @@ public class SpaceWarSubScene extends SubScene {
         super(new AnchorPane(), 600, 400);
         prefWidth(600);
         prefHeight(400);
+        
         BackgroundImage bi = new BackgroundImage(new Image(BACKGROUND_IMAGE, 600, 400, false, true), BackgroundRepeat.REPEAT, 
         		BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, (BackgroundSize)null);
+       
         AnchorPane root = (AnchorPane)getRoot();
         root.setBackground(new Background(bi));
+        
         setLayoutX(1100);
         setLayoutY(180);
     }
@@ -31,6 +34,7 @@ public class SpaceWarSubScene extends SubScene {
         TranslateTransition trans = new TranslateTransition();
         trans.setDuration(Duration.seconds(0.3D));
         trans.setNode(this);
+        
         if (isHide) {
             trans.setToX(-700);
             isHide = false;

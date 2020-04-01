@@ -1,6 +1,7 @@
 package view;
 
 import java.util.Random;
+
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -8,9 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import model.element.Bullet;
 import model.element.Meteor;
 import model.element.Ship;
 
@@ -31,9 +34,12 @@ public class GamePlay {
     private GridPane gridPane2;
     
     private Ship ship;
+    private Bullet[] bullet;
+    private int b;
     
     private boolean isLeftPressed;
     private boolean isRightPressed;
+    private boolean isMouseClicked;
     
     private AnimationTimer animationGame;
     
@@ -60,6 +66,7 @@ public class GamePlay {
 
             }
         });
+        
         gameScene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             
         	public void handle(KeyEvent event) {
@@ -71,6 +78,14 @@ public class GamePlay {
                 }
             }
         });
+        
+        gameScene.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				isMouseClicked = true;
+			}
+		});
     }
 
     private void initializeStage() {
@@ -97,7 +112,7 @@ public class GamePlay {
     private void createShip(Ship choosenShip) {
         ship = choosenShip;
         ship.setLayoutX(GAME_WIDTH / 2);
-        ship.setLayoutY(GAME_HEIGHT - Ship.HEIGHT);
+        ship.setLayoutY(GAME_HEIGHT - Ship.HEIGHT - 10);
         gamePane.getChildren().add(ship);
     }
 
@@ -124,7 +139,7 @@ public class GamePlay {
         
     	animationGame = new AnimationTimer() {
             public void handle(long now) {
-                moveShip();
+            	moveShipAndShoot();
                 moveBackground();
                 moveElement();
             }
@@ -136,11 +151,10 @@ public class GamePlay {
     private void createGameElement() {
         brownMeteors = new Meteor[5];
 
-        int i;
-        for(i = 0; i < brownMeteors.length; ++i) {
+        for(int i = 0; i < brownMeteors.length; ++i) {
            
         	brownMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], 
-            		(40 + randomInt.nextInt(1160)), (-randomInt.nextInt(2000)), 
+            		40 + randomInt.nextInt(1160), -randomInt.nextInt(2000), 
             		2 + randomInt.nextInt(5), 5 + randomInt.nextInt(4));
            
             gamePane.getChildren().add(brownMeteors[i]);
@@ -148,7 +162,7 @@ public class GamePlay {
 
         greyMeteors = new Meteor[5];
 
-        for(i = 0; i < greyMeteors.length; ++i) {
+        for(int i = 0; i < greyMeteors.length; ++i) {
             
         	greyMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], 
             		40 + randomInt.nextInt(1160), -randomInt.nextInt(2000), 
@@ -161,7 +175,7 @@ public class GamePlay {
 
     private void checkElementDisappear(Meteor meteor) {
     	
-        if (meteor.getLayoutY() > 850) {
+        if (meteor.getLayoutY() > GAME_HEIGHT) {
             meteor.setLayoutY(-randomInt.nextInt(2000));
             meteor.setLayoutX(40 + randomInt.nextInt(1160));
         }
@@ -181,7 +195,7 @@ public class GamePlay {
 
     }
 
-    private void moveShip() {
+    private void moveShipAndShoot() {
         if (isLeftPressed && !isRightPressed) {
             ship.moveLeft(0);
         }
@@ -197,7 +211,11 @@ public class GamePlay {
         if (isLeftPressed && isRightPressed) {
             ship.goStraight();
         }
-
+        
+        if (isMouseClicked) {
+        	ship.shoot(gamePane, 0);
+        	isMouseClicked = false;
+        }
     }
 
     private void moveBackground() {
