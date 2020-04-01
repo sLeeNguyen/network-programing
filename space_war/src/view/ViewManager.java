@@ -220,7 +220,7 @@ public class ViewManager {
             		}
 
                     sp.setCircleChoosen(true);
-                    choosenShip = new Ship(sp.getSHIP().getUrlShip());
+                    choosenShip = new Ship(sp.getSHIP().getUrlShip(), "player");
                 }
             });
         }

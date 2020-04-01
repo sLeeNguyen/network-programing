@@ -5,6 +5,7 @@ import javafx.scene.image.ImageView;
 public class Element extends ImageView {
 
 	private String type;
+	private boolean dead = false;
 	
 	public Element(String url) {
 		super(url);
@@ -18,5 +19,13 @@ public class Element extends ImageView {
 	
 	public String getType() {
 		return type;
+	}
+	
+	public boolean isDead() {
+		return dead;
+	}
+	
+	public void dead(boolean dead) {
+		this.dead = dead;
 	}
 }
