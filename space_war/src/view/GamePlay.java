@@ -1,6 +1,8 @@
 package view;
 
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
@@ -9,11 +11,11 @@ import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import model.element.Bullet;
+import model.element.Element;
 import model.element.Meteor;
 import model.element.Ship;
 
@@ -34,12 +36,9 @@ public class GamePlay {
     private GridPane gridPane2;
     
     private Ship ship;
-    private Bullet[] bullet;
-    private int b;
     
     private boolean isLeftPressed;
     private boolean isRightPressed;
-    private boolean isMouseClicked;
     
     private AnimationTimer animationGame;
     
@@ -62,6 +61,9 @@ public class GamePlay {
                     
                 } else if (event.getCode() == KeyCode.RIGHT) {
                     isRightPressed = true;
+                    
+                } else if (event.getCode() == KeyCode.SPACE) {
+                	shoot();
                 }
 
             }
@@ -78,14 +80,6 @@ public class GamePlay {
                 }
             }
         });
-        
-        gameScene.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent event) {
-				isMouseClicked = true;
-			}
-		});
     }
 
     private void initializeStage() {
@@ -116,6 +110,51 @@ public class GamePlay {
         gamePane.getChildren().add(ship);
     }
 
+    private List<Element> elements() {
+    	return gamePane.getChildren().stream().filter(n -> n instanceof Element).map(n -> (Element) n).collect(Collectors.toList());
+    }
+
+    private void shoot() {
+    	Bullet bullet = new Bullet("", "playerbullet", ship.getLayoutX() + 44, ship.getLayoutY());
+    	gamePane.getChildren().add(bullet);
+    }
+    
+    private void war() {
+    	elements().forEach(e -> {
+    		switch (e.getType()) {
+    			
+    			case "playerbullet":
+    				Bullet b = (Bullet) e;
+    				b.moveUp(5);
+    				
+    				if (b.getLayoutY() < 0) b.dead(true);
+    				elements().stream().filter(el -> el.getType().contains("enemy")).forEach(enemy -> {
+    					if (b.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+    						b.dead(true);
+    						enemy.dead(true);
+    					}
+    				});
+    				
+    				break;
+    				
+    			case "enemybullet":
+    				// handle
+    				break;
+				
+    			case "enemymeteor":
+    				//handle
+    				break;
+    		}
+    	});
+    	
+    	gamePane.getChildren().removeIf(n -> {
+    		if (n instanceof Element) {
+    			return ((Element) n).isDead();
+    		}
+    		return false;
+    	});
+    }
+    
     private void createBackground() {
         gridPane1 = new GridPane();
         gridPane2 = new GridPane();
@@ -139,9 +178,10 @@ public class GamePlay {
         
     	animationGame = new AnimationTimer() {
             public void handle(long now) {
-            	moveShipAndShoot();
+            	moveShip();
                 moveBackground();
                 moveElement();
+                war();
             }
         };
         
@@ -153,7 +193,7 @@ public class GamePlay {
 
         for(int i = 0; i < brownMeteors.length; ++i) {
            
-        	brownMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], 
+        	brownMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], "enemymeteor", 
             		40 + randomInt.nextInt(1160), -randomInt.nextInt(2000), 
             		2 + randomInt.nextInt(5), 5 + randomInt.nextInt(4));
            
@@ -164,7 +204,7 @@ public class GamePlay {
 
         for(int i = 0; i < greyMeteors.length; ++i) {
             
-        	greyMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], 
+        	greyMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], "enemymeteor",
             		40 + randomInt.nextInt(1160), -randomInt.nextInt(2000), 
             		2 + randomInt.nextInt(2), 5 + randomInt.nextInt(4));
             
@@ -195,7 +235,7 @@ public class GamePlay {
 
     }
 
-    private void moveShipAndShoot() {
+    private void moveShip() {
         if (isLeftPressed && !isRightPressed) {
             ship.moveLeft(0);
         }
@@ -210,11 +250,6 @@ public class GamePlay {
 
         if (isLeftPressed && isRightPressed) {
             ship.goStraight();
-        }
-        
-        if (isMouseClicked) {
-        	ship.shoot(gamePane, 0);
-        	isMouseClicked = false;
         }
     }
 

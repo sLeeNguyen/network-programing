@@ -1,23 +1,21 @@
 package model.element;
 
-import javafx.scene.image.ImageView;
-
-public class Meteor extends ImageView {
+public class Meteor extends Element {
     private int angle;
     private int speed;
 
-    public Meteor(String url) {
-        super(url);
+    public Meteor(String url, String type) {
+        super(url, type);
     }
 
-    public Meteor(String url, double posX, double posY) {
-        super(url);
+    public Meteor(String url, String type, double posX, double posY) {
+        super(url, type);
         setLayoutX(posX);
         setLayoutY(posY);
     }
 
-    public Meteor(String url, double posX, double posY, int angle, int speed) {
-        super(url);
+    public Meteor(String url, String type, double posX, double posY, int angle, int speed) {
+        super(url, type);
         setLayoutX(posX);
         setLayoutY(posY);
         this.angle = angle;
