@@ -14,6 +14,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import model.element.Bullet;
 import model.element.Element;
 import model.element.Meteor;
@@ -24,8 +25,7 @@ public class GamePlay {
     private static final int GAME_HEIGHT = 850;
     
     private static final String BACKGROUND_URL = "/view/resources/purple.png";
-    private static final String[] METEOR_IMAGES = {"/view/resources/meteorite/meteor_grey_big2.png", "/view/resources/meteorite/meteor_brown.png", 
-    		"/view/resources/meteorite/meteor_grey.png", "/view/resources/meteorite/meteor_brown_big3.png"};
+    private static final String[] METEOR_IMAGES = {"/view/resources/meteorite/meteor_brown.png", "/view/resources/meteorite/meteor_grey.png", "/view/resources/meteorite/meteor_brown_big3.png"};
     
     private AnchorPane gamePane;
     private Scene gameScene;
@@ -106,7 +106,7 @@ public class GamePlay {
     private void createShip(Ship choosenShip) {
         ship = choosenShip;
         ship.setLayoutX(GAME_WIDTH / 2);
-        ship.setLayoutY(GAME_HEIGHT - Ship.HEIGHT - 10);
+        ship.setLayoutY(GAME_HEIGHT - ship.getHeight() - 10);
         gamePane.getChildren().add(ship);
     }
 
@@ -115,7 +115,7 @@ public class GamePlay {
     }
 
     private void shoot() {
-    	Bullet bullet = new Bullet("", "playerbullet", ship.getLayoutX() + 44, ship.getLayoutY());
+    	Bullet bullet = new Bullet(null, "playerbullet", ship.getLayoutX() + 44, ship.getLayoutY(), 12, 13, 37);
     	gamePane.getChildren().add(bullet);
     }
     
@@ -129,7 +129,7 @@ public class GamePlay {
     				
     				if (b.getLayoutY() < 0) b.dead(true);
     				elements().stream().filter(el -> el.getType().contains("enemy")).forEach(enemy -> {
-    					if (b.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+    					if (checkCollide(b, enemy)) {
     						b.dead(true);
     						enemy.dead(true);
     					}
@@ -193,20 +193,32 @@ public class GamePlay {
 
         for(int i = 0; i < brownMeteors.length; ++i) {
            
-        	brownMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], "enemymeteor", 
-            		40 + randomInt.nextInt(1160), -randomInt.nextInt(2000), 
-            		2 + randomInt.nextInt(5), 5 + randomInt.nextInt(4));
-           
+//        	Meteor(String url, String type, double posX, double posY, int angle, int speed, double radius, double width, double height)
+        	brownMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(3)],
+					        			"enemymeteor", 
+					            		40 + randomInt.nextInt(1160),
+					            		-randomInt.nextInt(2000), 
+					            		2 + randomInt.nextInt(5),
+					            		5 + randomInt.nextInt(4),
+					            		12D,
+					            		43, 43);
+					           
             gamePane.getChildren().add(brownMeteors[i]);
         }
 
         greyMeteors = new Meteor[5];
 
         for(int i = 0; i < greyMeteors.length; ++i) {
-            
-        	greyMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(4)], "enemymeteor",
-            		40 + randomInt.nextInt(1160), -randomInt.nextInt(2000), 
-            		2 + randomInt.nextInt(2), 5 + randomInt.nextInt(4));
+
+//        	Meteor(String url, String type, double posX, double posY, int angle, int speed, double radius, double width, double height)
+        	greyMeteors[i] = new Meteor(METEOR_IMAGES[randomInt.nextInt(3)],
+					        			"enemymeteor",
+					            		40 + randomInt.nextInt(1160),
+					            		-randomInt.nextInt(2000), 
+					            		2 + randomInt.nextInt(2),
+					            		5 + randomInt.nextInt(4),
+					            		12D,
+					            		43, 43);
             
             gamePane.getChildren().add(greyMeteors[i]);
         }
@@ -264,5 +276,21 @@ public class GamePlay {
         if (gridPane1.getLayoutY() >= 1024) {
             gridPane1.setLayoutY(-1024);
         }
+    }
+    
+    private double caculateDistance(Pair<Double, Double> coor1, Pair<Double, Double> coor2) {
+    	return Math.sqrt(Math.pow(coor1.getKey() - coor2.getKey(), 2) + Math.pow(coor1.getValue() - coor2.getValue(), 2));
+    }
+    
+    private boolean checkCollide(Element e1, Element e2) {
+    	if (e1.getRadius() + e2.getRadius() > caculateDistance(e1.getCoordinate(), e2.getCoordinate())) {
+    		return true;
+    	}
+    	return false;
+    }
+    
+    private boolean checkEndGame() {
+    	//handle
+    	return false;
     }
 }
