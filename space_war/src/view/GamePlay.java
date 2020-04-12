@@ -1,11 +1,15 @@
 package view;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import helpers.CheckAndAlert;
+import helpers.controllers.TitleBarController;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
@@ -14,6 +18,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Pair;
 import model.element.Bullet;
 import model.element.Element;
@@ -27,6 +32,7 @@ public class GamePlay {
     private static final String BACKGROUND_URL = "/view/resources/purple.png";
     private static final String[] METEOR_IMAGES = {"/view/resources/meteorite/meteor_brown.png", "/view/resources/meteorite/meteor_grey.png", "/view/resources/meteorite/meteor_brown_big3.png"};
     
+    private AnchorPane root;
     private AnchorPane gamePane;
     private Scene gameScene;
     private Stage gameStage;
@@ -83,9 +89,15 @@ public class GamePlay {
     }
 
     private void initializeStage() {
+    	root = new AnchorPane();
         gamePane = new AnchorPane();
-        gameScene = new Scene(gamePane, GAME_WIDTH, GAME_HEIGHT);
+        gameScene = new Scene(root, GAME_WIDTH, GAME_HEIGHT + 40);
+        
+        gamePane.setPrefHeight(GAME_HEIGHT);
+        gamePane.setPrefWidth(GAME_WIDTH);
+        
         gameStage = new Stage();
+        gameStage.initStyle(StageStyle.UNDECORATED);
         gameStage.setScene(gameScene);
     }
 
@@ -100,7 +112,34 @@ public class GamePlay {
         createShip(ship);
         createGameElement();
         createGameLoop();
+        setUpAll();
         gameStage.show();
+    }
+    
+    private void setUpAll() {
+    	root.getChildren().add(gamePane);
+    	
+    	AnchorPane.setTopAnchor(gamePane, 40D);
+    	AnchorPane.setBottomAnchor(gamePane, 0D);
+    	AnchorPane.setLeftAnchor(gamePane, 0D);
+    	AnchorPane.setRightAnchor(gamePane, 0D);
+    	
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/helpers/fxml/title_bar.fxml"));
+			Node node = loader.load();
+			TitleBarController controller = loader.getController();
+			controller.setDisableButtonCancel();
+		
+			root.getChildren().add(node);
+			AnchorPane.setTopAnchor(node, 0D);
+	    	AnchorPane.setLeftAnchor(node, 0D);
+	    	AnchorPane.setRightAnchor(node, 0D);
+	    	
+		} catch (IOException e) {
+			CheckAndAlert.alertErrorMessage("Xảy ra lỗi. Xin hãy thử lại!");
+			e.printStackTrace();
+		}
+    	
     }
 
     private void createShip(Ship choosenShip) {
