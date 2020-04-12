@@ -1,0 +1,56 @@
+.background {
+	-fx-background-image: url('./resources/swb2.jpg');
+	-fx-background-size: cover;
+}
+
+.jfx-text-field {
+	-fx-prompt-text-fill: #acacac;
+	-jfx-focus-color: white;
+	-jfx-unfocus-color: white;
+	-fx-font-size: 18px;
+	-jfx-label-float: true;
+	-fx-text-inner-color: white;
+}
+
+.jfx-password-field {
+	-fx-prompt-text-fill: #acacac;
+	-jfx-focus-color: white;
+	-jfx-unfocus-color: white;
+	-fx-font-size: 18px;
+	-jfx-label-float: true;
+	-fx-text-inner-color: white;
+}
+
+.jfxbutton {
+	-fx-font-size: 20px;
+	-fx-text-fill: white;
+	-fx-background-color: #5164AE;
+	-fx-font-weight: bold;
+	-fx-background-radius: 10px;
+}
+
+.jfxbutton:hover {
+	-fx-font-size: 20px;
+	-fx-text-fill: black;
+	-fx-font-weight: bold;
+	-fx-background-color: #ffffffd6;
+	-fx-background-radius: 10px;
+	-fx-cursor: hand;
+}
+
+.label-style {
+	-fx-text-fill: white;
+	-fx-font-weight: bold;
+	-fx-cursor: hand;
+}
+
+.label-style:hover {
+	-fx-text-fill: red;
+}
+
+.text1:hover {
+	-fx-fill: red;
+	-fx-cursor: hand;
+	-fx-font-size: 16px;
+	-fx-font-weight: bold;
+}
