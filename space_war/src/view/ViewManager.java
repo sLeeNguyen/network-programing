@@ -1,10 +1,14 @@
 package view;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import helpers.CheckAndAlert;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -31,7 +35,8 @@ public class ViewManager {
     private static final int MENU_BUTTONS_START_X = 100;
     private static final int MENU_BUTTONS_START_Y = 160;
     
-    private AnchorPane mainPane = new AnchorPane();
+    private AnchorPane root;
+    private AnchorPane mainPane;
     private Scene mainScene;
     private Stage mainStage;
     private SpaceWarSubScene startSubScene;
@@ -43,15 +48,17 @@ public class ViewManager {
     List<ShipPicker> shipPickers;
     private Ship choosenShip;
 
-    public ViewManager() {
-        mainScene = new Scene(mainPane, WIDTH, HEIGHT);
+    public ViewManager() {  
+    	root = new AnchorPane();
+    	mainPane = new AnchorPane();
+    	mainPane.setPrefHeight(HEIGHT);
+    	mainPane.setPrefWidth(WIDTH);
+    	
+    	setUpAll();
+        
+        mainScene = new Scene(root, WIDTH, HEIGHT + 40);
         mainStage = new Stage();
         mainStage.setScene(mainScene);
-        
-        createButton();
-        createBackground();
-        createLogo();
-        createSubScene();
     }
 
     public Stage getMainStage() {
@@ -81,6 +88,34 @@ public class ViewManager {
         mainPane.getChildren().add(creditsSubScene);
     }
 
+    private void setUpAll() {
+    	createButton();
+        createBackground();
+        createLogo();
+        createSubScene();
+        
+    	root.getChildren().add(mainPane);
+    	
+    	AnchorPane.setTopAnchor(mainPane, 40D);
+    	AnchorPane.setBottomAnchor(mainPane, 0D);
+    	AnchorPane.setLeftAnchor(mainPane, 0D);
+    	AnchorPane.setRightAnchor(mainPane, 0D);
+    	
+		try {
+			Node node = FXMLLoader.load(getClass().getResource("/helpers/fxml/title_bar.fxml"));
+		
+			root.getChildren().add(node);
+			AnchorPane.setTopAnchor(node, 0D);
+	    	AnchorPane.setLeftAnchor(node, 0D);
+	    	AnchorPane.setRightAnchor(node, 0D);
+	    	
+		} catch (IOException e) {
+			CheckAndAlert.alertErrorMessage("Xảy ra lỗi. Xin hãy thử lại!");
+			e.printStackTrace();
+		}
+    	
+    }
+    
     private void addMenuButton(SpaceWarButton button) {
         button.setLayoutX(MENU_BUTTONS_START_X);
         button.setLayoutY(MENU_BUTTONS_START_Y + menuButtons.size() * MENU_BUTTONS_START_X);
