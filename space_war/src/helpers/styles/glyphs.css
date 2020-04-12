@@ -1,0 +1,15 @@
+.glyph-icon{
+    -fx-cursor: hand;
+}
+
+.glyph-cancel:hover {
+	-glyph-name: "TIMES_CIRCLE";	
+}
+
+.glyph-maximize:hover {
+	-glyph-name: "PLUS_CIRCLE";
+}
+
+.glyph-minimize:hover {
+	-glyph-name: "MINUS_CIRCLE";
+}
