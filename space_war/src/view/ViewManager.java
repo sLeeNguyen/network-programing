@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import helpers.CheckAndAlert;
-import helpers.controllers.TitleBarController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;

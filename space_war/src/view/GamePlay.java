@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import helpers.CheckAndAlert;
-import helpers.controllers.TitleBarController;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -125,10 +124,7 @@ public class GamePlay {
     	AnchorPane.setRightAnchor(gamePane, 0D);
     	
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/helpers/fxml/title_bar.fxml"));
-			Node node = loader.load();
-			TitleBarController controller = loader.getController();
-			controller.setDisableButtonCancel();
+			Node node = FXMLLoader.load(getClass().getResource("/helpers/fxml/title_bar.fxml"));
 		
 			root.getChildren().add(node);
 			AnchorPane.setTopAnchor(node, 0D);

@@ -3,14 +3,12 @@ package helpers.controllers;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import helpers.CheckAndAlert;
 import helpers.MoveWindow;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 
