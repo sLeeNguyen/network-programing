@@ -8,6 +8,7 @@ import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 
 import helpers.CheckAndAlert;
+import helpers.connect.Client;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,7 +18,10 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import view.ViewManager;
 
 public class LoginController implements Initializable {
 	
@@ -114,13 +118,44 @@ public class LoginController implements Initializable {
 
     @FXML
     void onSignIn(ActionEvent event) {
-
+    	String username = usernameSignInJFX.getText();
+    	String password = passwordSignInJFX.getText();
+    	
+    	if (checkSignIn(username, password)) {
+    		String data = "01/" + username + "&" + password;
+    		boolean success = Client.sendLoginRequest(data);
+    		if (success) {
+    			Node node = (Node) event.getSource();
+    			((Stage) node.getScene().getWindow()).close();
+    			setGame();
+    		} else CheckAndAlert.alertErrorMessage("Đăng nhập thất bại. Hãy thử lại!");
+    	}
     }
 
     @FXML
     void onSignUp(ActionEvent event) {
     	setPaneVisible(signInVBox, true);
     	setPaneVisible(signUpVBox, false);
-
+    }
+    
+    private boolean checkSignIn(String username, String password) {
+    	if (username == null || "".equals(username)) {
+    		CheckAndAlert.alertErrorMessage("Vui lòng nhập tài khoản");
+    		return false;
+    	}
+    	
+    	if (password == null || "".equals(password)) {
+    		CheckAndAlert.alertErrorMessage("Vui lòng nhập mật khẩu");
+    		return false;
+    	}
+    	
+    	return true;
+    }
+    
+    private void setGame() {
+    	ViewManager manager = new ViewManager();
+		Stage stage = manager.getMainStage();
+		stage.initStyle(StageStyle.UNDECORATED);
+		stage.show();
     }
 }

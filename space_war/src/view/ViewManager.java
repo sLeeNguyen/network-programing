@@ -275,9 +275,9 @@ public class ViewManager {
     }
 
     private void createLogo() {
-        ImageView logo = new ImageView("/view/resources/logo4.gif");
+        ImageView logo = new ImageView("/view/resources/logox.png");
         logo.setLayoutX(450);
-        logo.setLayoutY(50);
+        logo.setLayoutY(40);
         logo.setStyle("-fx-cursor: hand;");
         logo.setEffect(new DropShadow());
         
