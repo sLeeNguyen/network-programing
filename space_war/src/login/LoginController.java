@@ -116,19 +116,19 @@ public class LoginController implements Initializable {
     	setPaneVisible(signUpVBox, true);
     }
 
-    @FXML
+	@FXML
     void onSignIn(ActionEvent event) {
     	String username = usernameSignInJFX.getText();
     	String password = passwordSignInJFX.getText();
     	
     	if (checkSignIn(username, password)) {
-    		String data = "01/" + username + "&" + password;
-    		boolean success = Client.sendLoginRequest(data);
+    		boolean success = Client.sendLoginRequestAndHandleResponse(username, password);
+    		
     		if (success) {
     			Node node = (Node) event.getSource();
     			((Stage) node.getScene().getWindow()).close();
     			setGame();
-    		} else CheckAndAlert.alertErrorMessage("Đăng nhập thất bại. Hãy thử lại!");
+    		}
     	}
     }
 
