@@ -33,14 +33,14 @@ public class ViewManager {
     private static final int HEIGHT = 768;
     private static final int WIDTH = 1100;
     private static final int MENU_BUTTONS_START_X = 100;
-    private static final int MENU_BUTTONS_START_Y = 160;
+    private static final int MENU_BUTTONS_START_Y = 180;
     
     private AnchorPane root;
     private AnchorPane mainPane;
     private Scene mainScene;
     private Stage mainStage;
     private SpaceWarSubScene startSubScene;
-    private SpaceWarSubScene scoreSubScene;
+    private SpaceWarSubScene roomSubScene;
     private SpaceWarSubScene helpSubScene;
     private SpaceWarSubScene creditsSubScene;
     private SpaceWarSubScene currentSubScene;
@@ -69,7 +69,7 @@ public class ViewManager {
     	menuButtons = new ArrayList<>();
     	
         createStartButton();
-        createScoreButton();
+        createRoomButton();
         createHelpButton();
         createCreditsButton();
         createExitButton();
@@ -77,9 +77,7 @@ public class ViewManager {
 
     private void createSubScene() {
         createShipChooserSubScene();
-        
-        scoreSubScene = new SpaceWarSubScene();
-        mainPane.getChildren().add(scoreSubScene);
+        createRoomSubScene();
         
         helpSubScene = new SpaceWarSubScene();
         mainPane.getChildren().add(helpSubScene);
@@ -114,6 +112,7 @@ public class ViewManager {
 			e.printStackTrace();
 		}
     	
+		showSubScene(startSubScene);
     }
     
     private void addMenuButton(SpaceWarButton button) {
@@ -134,7 +133,6 @@ public class ViewManager {
         } else {
             currentSubScene = null;
         }
-
     }
 
     private void createStartButton() {
@@ -149,14 +147,14 @@ public class ViewManager {
         });
     }
 
-    private void createScoreButton() {
-        SpaceWarButton scoreButton = new SpaceWarButton("SCORE");
-        addMenuButton(scoreButton);
+    private void createRoomButton() {
+        SpaceWarButton roomButton = new SpaceWarButton("ROOM");
+        addMenuButton(roomButton);
         
-        scoreButton.setOnAction(new EventHandler<ActionEvent>() {
+        roomButton.setOnAction(new EventHandler<ActionEvent>() {
         
         	public void handle(ActionEvent event) {
-                showSubScene(scoreSubScene);
+                showSubScene(roomSubScene);
             }
         });
     }
@@ -196,7 +194,11 @@ public class ViewManager {
             }
         });
     }
-
+    
+    
+    /*
+     * Set startSubScene's elements
+    */
     private void createShipChooserSubScene() {
         startSubScene = new SpaceWarSubScene();
         mainPane.getChildren().add(startSubScene);
@@ -223,7 +225,7 @@ public class ViewManager {
         
         	public void handle(MouseEvent event) {
                 if (choosenShip == null) {
-                    System.out.println("Please choose your ship!");
+                    CheckAndAlert.alertSuccessMessage("Please choose your ship");
                 } else {
                     GamePlay gameManager = new GamePlay();
                     gameManager.createNewGame(mainStage, choosenShip);
@@ -231,7 +233,7 @@ public class ViewManager {
             }
         });
     }
-
+    
     private HBox createListShip() {
         HBox box = new HBox();
         box.setSpacing(20);
@@ -265,7 +267,61 @@ public class ViewManager {
         
         return box;
     }
+    /*======================== End startSubScene ========================*/
+    
+    
+    /*
+     * Set roomSubScene's elements
+    */
+    private void createRoomSubScene() {
+    	roomSubScene = new SpaceWarSubScene();
+        mainPane.getChildren().add(roomSubScene);
+        createButtonForRoomSubScene();
+        
+    }
+    
+    private void createButtonForRoomSubScene() {
+    	SpaceWarButton createRoomButton = new SpaceWarButton("NEW ROOM"); 
+    	SpaceWarButton joinRoomButton = new SpaceWarButton("JOIN ROOM"); 
+    	createRoomButton.changeButton(); createRoomButton.setLayoutX(175); createRoomButton.setLayoutY(120);
+    	joinRoomButton.changeButton();	joinRoomButton.setLayoutX(175); joinRoomButton.setLayoutY(200);
+    	
+    	createRoomButton.setOnAction(new EventHandler<ActionEvent>() {
 
+			@Override
+			public void handle(ActionEvent event) {
+				
+				
+			}
+		});
+    	
+    	joinRoomButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				
+				
+			}
+		});
+    	
+    	roomSubScene.getPane().getChildren().addAll(createRoomButton, joinRoomButton);
+    }
+    /*======================== End roomSubScene ========================*/
+    
+    
+    /*
+     * Set roomSubScene's elements
+    */
+    
+    /*======================== End roomSubScene ========================*/
+    
+    
+    /*
+     * Set roomSubScene's elements
+    */
+    
+    /*======================== End roomSubScene ========================*/
+    
     private void createBackground() {
         Image backgroundImage = new Image("/view/resources/blue.png", 256, 256, false, true);
         BackgroundImage bi = new BackgroundImage(backgroundImage, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, 

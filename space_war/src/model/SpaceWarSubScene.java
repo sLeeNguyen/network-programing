@@ -27,7 +27,7 @@ public class SpaceWarSubScene extends SubScene {
         root.setBackground(new Background(bi));
         
         setLayoutX(1100);
-        setLayoutY(180);
+        setLayoutY(200);
     }
 
     public void moveSubScene() {

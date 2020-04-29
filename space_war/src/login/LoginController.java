@@ -134,8 +134,25 @@ public class LoginController implements Initializable {
 
     @FXML
     void onSignUp(ActionEvent event) {
-    	setPaneVisible(signInVBox, true);
-    	setPaneVisible(signUpVBox, false);
+    	String username = usernameSignUpJFX.getText();
+    	String password = passwordSignUpJFX.getText();
+    	String confirm_password = confirmPassSignUpJFX.getText();
+    	
+    	if (checkSignUp(username, password, confirm_password)) {
+    		boolean success = Client.sendRegistrationRequestAndHandleResponse(username, password);
+    		
+    		if (success) {
+    			CheckAndAlert.alertSuccessMessage("Đăng kí thành công!");
+    			boolean toSignIn = CheckAndAlert.alertConfirmMessage("Đăng nhập ngay");
+    			if (toSignIn) {
+    				usernameSignInJFX.setText(username);
+    				passwordSignInJFX.setText(password);
+    				setPaneVisible(signInVBox, true);
+    		    	setPaneVisible(signUpVBox, false);
+    			}
+    		}
+    	}
+    	
     }
     
     private boolean checkSignIn(String username, String password) {
@@ -146,6 +163,30 @@ public class LoginController implements Initializable {
     	
     	if (password == null || "".equals(password)) {
     		CheckAndAlert.alertErrorMessage("Vui lòng nhập mật khẩu");
+    		return false;
+    	}
+    	
+    	return true;
+    }
+    
+    private boolean checkSignUp(String username, String password, String confirm_password) {
+    	if (username == null || "".equals(username)) {
+    		CheckAndAlert.alertErrorMessage("Vui lòng điền tài khoản");
+    		return false;
+    	}
+    	
+    	if (password == null || "".equals(password)) {
+    		CheckAndAlert.alertErrorMessage("Vui lòng điền mật khẩu");
+    		return false;
+    	}
+    	
+    	if (confirm_password == null || "".equals(confirm_password)) {
+    		CheckAndAlert.alertErrorMessage("Vui lòng xác nhận lại mật khẩu");
+    		return false;
+    	}
+    	
+    	if (!password.equals(confirm_password)) {
+    		CheckAndAlert.alertErrorMessage("Mật khẩu xác nhận không chính xác");
     		return false;
     	}
     	

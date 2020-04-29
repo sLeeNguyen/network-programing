@@ -11,18 +11,24 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Font;
 
 public class SpaceWarButton extends Button {
-    private final String FONT_PATH = "src/model/resources/kenvector_future.ttf";
-    private final String BUTTON_STYLE = "-fx-background-color: transparent; -fx-background-image: url('/model/resources/yellow_button.png'); -fx-cursor: hand;";
-
+    private static final String FONT_PATH = "src/model/resources/kenvector_future.ttf";
+    private static final String BUTTON_STYLE_1 = "-fx-background-color: transparent; -fx-background-image: url('/model/resources/yellow_button.png'); -fx-cursor: hand;";
+    private static final String BUTTON_STYLE_2 = "-fx-background-color: transparent; -fx-background-image: url('/model/resources/yellow_button13.png'); -fx-background-size: 250 49; -fx-cursor: hand;";
+    		
     public SpaceWarButton(String text) {
         setText(text);
         setButtonFont();
         setPrefWidth(190);
         setPrefHeight(49);
-        setStyle(BUTTON_STYLE);
+        setStyle(BUTTON_STYLE_1);
         initializeButtonListeners();
     }
-
+    
+    public void changeButton() {
+    	setPrefSize(250, 49);
+    	setStyle(BUTTON_STYLE_2);
+    }
+    
     private void setButtonFont() {
         try {
             setFont(Font.loadFont(new FileInputStream(FONT_PATH), 23));
@@ -30,7 +36,6 @@ public class SpaceWarButton extends Button {
             setFont(Font.font("Verdana", 23));
             System.out.println("Lỗi load font");
         }
-
     }
 
     private void setButtonPressedStyle() {

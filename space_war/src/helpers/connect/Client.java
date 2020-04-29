@@ -60,4 +60,48 @@ public class Client {
 		
 		return false;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static boolean sendRegistrationRequestAndHandleResponse(String username, String password) {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 12);
+		request.put("username", username);
+		request.put("password", password);
+		
+		Socket socketClient = null;
+		try {
+			socketClient = new Socket(serverIP, serverPort);
+			PrintStream pr = new PrintStream(socketClient.getOutputStream());
+			pr.println(request.toJSONString());
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
+			String s_res = br.readLine();
+			
+			JSONObject response = (JSONObject) JSONValue.parse(s_res);
+			long status = (long) response.get("status");
+			
+			socketClient.close();
+			if (status == 0) {
+				long error_code = (long) response.get("error_code");
+				String message = (String) response.get("message");
+				
+				CheckAndAlert.alertErrorMessage((int)error_code, message);
+				return false;
+			}
+			
+			return true;
+			
+		} catch (IOException e) {
+			CheckAndAlert.alertErrorMessage("Lỗi kết nối. Hãy thử lại!");
+			if (socketClient != null)
+				try {
+					socketClient.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
 }
