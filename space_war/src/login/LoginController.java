@@ -8,6 +8,7 @@ import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 
 import helpers.CheckAndAlert;
+import helpers.UserInformation;
 import helpers.connect.Client;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
@@ -118,22 +119,26 @@ public class LoginController implements Initializable {
 
 	@FXML
     void onSignIn(ActionEvent event) {
+    	new Client();
+		
     	String username = usernameSignInJFX.getText();
     	String password = passwordSignInJFX.getText();
     	
     	if (checkSignIn(username, password)) {
-    		boolean success = Client.sendLoginRequestAndHandleResponse(username, password);
+    		int userID = Client.sendLoginRequestAndHandleResponse(username, password);
     		
-    		if (success) {
+    		if (userID != 0) {
     			Node node = (Node) event.getSource();
     			((Stage) node.getScene().getWindow()).close();
-    			setGame();
+    			
+    			UserInformation user = new UserInformation(username, userID);
+    			setGame(user);
     		}
     	}
     }
 
     @FXML
-    void onSignUp(ActionEvent event) {
+    void onSignUp(ActionEvent event) {   	
     	String username = usernameSignUpJFX.getText();
     	String password = passwordSignUpJFX.getText();
     	String confirm_password = confirmPassSignUpJFX.getText();
@@ -193,8 +198,11 @@ public class LoginController implements Initializable {
     	return true;
     }
     
-    private void setGame() {
+    private void setGame(UserInformation user) {
     	ViewManager manager = new ViewManager();
+    	
+    	ViewManager.user = user;
+    	
 		Stage stage = manager.getMainStage();
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.show();

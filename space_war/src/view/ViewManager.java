@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import helpers.CheckAndAlert;
+import helpers.UserInformation;
+import helpers.connect.Client;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +25,7 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import model.InfoLabel;
+import model.RoomInformationSubScene;
 import model.SHIP;
 import model.ShipPicker;
 import model.SpaceWarButton;
@@ -34,6 +37,8 @@ public class ViewManager {
     private static final int WIDTH = 1100;
     private static final int MENU_BUTTONS_START_X = 100;
     private static final int MENU_BUTTONS_START_Y = 180;
+    
+    public static UserInformation user;
     
     private AnchorPane root;
     private AnchorPane mainPane;
@@ -60,7 +65,7 @@ public class ViewManager {
         mainStage = new Stage();
         mainStage.setScene(mainScene);
     }
-
+    
     public Stage getMainStage() {
         return mainStage;
     }
@@ -276,22 +281,25 @@ public class ViewManager {
     private void createRoomSubScene() {
     	roomSubScene = new SpaceWarSubScene();
         mainPane.getChildren().add(roomSubScene);
-        createButtonForRoomSubScene();
-        
+        createButtonOfRoomSubScene();
     }
     
-    private void createButtonForRoomSubScene() {
+    private void createButtonOfRoomSubScene() {
     	SpaceWarButton createRoomButton = new SpaceWarButton("NEW ROOM"); 
     	SpaceWarButton joinRoomButton = new SpaceWarButton("JOIN ROOM"); 
     	createRoomButton.changeButton(); createRoomButton.setLayoutX(175); createRoomButton.setLayoutY(120);
     	joinRoomButton.changeButton();	joinRoomButton.setLayoutX(175); joinRoomButton.setLayoutY(200);
     	
-    	createRoomButton.setOnAction(new EventHandler<ActionEvent>() {
+    	roomSubScene.getPane().getChildren().addAll(createRoomButton, joinRoomButton);
+    	
+    	createRoomButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
 			@Override
-			public void handle(ActionEvent event) {
-				
-				
+			public void handle(MouseEvent event) {
+				RoomInformationSubScene roomInfo = new RoomInformationSubScene(50, 50);
+				roomSubScene.getPane().getChildren().clear();
+				roomSubScene.getPane().getChildren().add(roomInfo);		
+				setButtonOfRoomInfor(roomInfo);
 			}
 		});
     	
@@ -303,9 +311,42 @@ public class ViewManager {
 				
 			}
 		});
-    	
-    	roomSubScene.getPane().getChildren().addAll(createRoomButton, joinRoomButton);
     }
+    
+    private void setButtonOfRoomInfor(RoomInformationSubScene roomInfor) {
+		SpaceWarButton cancelButton = new SpaceWarButton("CANCEL");
+		SpaceWarButton createButton = new SpaceWarButton("CREATE");
+		
+		cancelButton.setLayoutX(60); cancelButton.setLayoutY(300);
+		createButton.setLayoutX(340); createButton.setLayoutY(300);
+		
+		roomSubScene.getPane().getChildren().addAll(cancelButton, createButton);
+		
+		cancelButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				roomSubScene.getPane().getChildren().clear();
+				createButtonOfRoomSubScene();
+			}
+		});
+		
+		createButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				String roomName = roomInfor.getRoomName();
+				String roomPass = roomInfor.getPassword();
+				int size = roomInfor.getRoomSize();
+
+				boolean status = Client.sendRoomCreationRequestAndHAndleResponse(roomName, user.getName(), size, roomPass);
+				if (status) {
+					//create room ui
+					CheckAndAlert.alertSuccessMessage("Tạo phòng thành công!");
+				}
+			}
+		});
+	}
     /*======================== End roomSubScene ========================*/
     
     
