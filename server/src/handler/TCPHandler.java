@@ -19,62 +19,96 @@ import code.Message;
 import code.RequestCode;
 import code.StatusCode;
 import database.DatabaseHandler;
+import helpers.Room;
+import server.TCPServer;
 
 public class TCPHandler extends Thread {
 	private Socket socket;
 	private Connection conn;
-	private Date date;
-	
+	private PrintStream pr;
+	private BufferedReader br;
+
 	public TCPHandler(Socket socket) {
 		this.socket = socket;
 		conn = DatabaseHandler.getInstance().getConnection();
-		date = new Date(System.currentTimeMillis());
+		try {
+			br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			pr = new PrintStream(socket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
 	public void run() {
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			String s_req = br.readLine();
-			System.out.println(s_req);
-			JSONObject request = (JSONObject) JSONValue.parse(s_req);
-			
-			long req_code = (long) request.get("req_code");
-			
-			// handle request and send response
-			if (req_code == RequestCode.SIGNIN_REQ) {
-				signInHandler(request);
-			} 
-			else if (req_code == RequestCode.SIGNUP_REQ) {
-				signUpHanlder(request);
+			while (true) {
+				String s_req = br.readLine();
+				System.out.println(s_req);
+				JSONObject request = (JSONObject) JSONValue.parse(s_req);
+				
+				long req_code = (long) request.get("req_code");
+				
+				// handle request and send response			
+				switch((int)req_code) {
+					case RequestCode.SIGNIN_REQ:
+						signInHandler(request);
+						break;
+					
+					case RequestCode.SIGNUP_REQ:
+						signUpHanlder(request);
+						break;
+						
+					case RequestCode.ROOM_CREATION_REQ:
+						roomCreationHandler(request);
+						break;
+						
+					default: break;
+				}
 			}
 			
-		} catch (IOException e) {
-			System.out.println("Error when read or write data");
+		} catch (IOException | SQLException e) {
+			System.out.println("Error: " + e.getMessage());
 			sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.SERVER_FAILED, Message.SERVER_ERROR));
 		}
 	}
 	
-	private void signInHandler(JSONObject request) {
+	private void signInHandler(JSONObject request) throws SQLException, IOException {
 		String username = (String) request.get("username");
 		String password = (String) request.get("password");
 		
 		int id = checkSignIn(username, password);
 		if (id != 0) {
-			sendResponse(makeJSONResponseAttachData(StatusCode.SUCCESS, ""+id, ErrorCode.DEFAULT, null));
+			TCPServer.addClientConnection(id, socket);
+			sendResponse(makeJSONResponseAttachData(StatusCode.SUCCESS, ""+id, ErrorCode.NONE, null));
 		} else {
 			sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.SIGNIN_FAILED, Message.USER_AND_PASS_NOT_EXISTS));
 		}
 	}
 	
-	private void signUpHanlder(JSONObject request) {
+	private void signUpHanlder(JSONObject request) throws SQLException, IOException {
 		String username = (String) request.get("username");
 		String password = (String) request.get("password");
 		
 		if (!checkUserExists(username) && saveUserToDatabase(username, password)) {
-			sendResponse(makeJSONResponse(StatusCode.SUCCESS, ErrorCode.DEFAULT, null));
+			sendResponse(makeJSONResponse(StatusCode.SUCCESS, ErrorCode.NONE, null));
 		} else {
 			sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.SIGNUP_FAILED, Message.USER_EXISTS));
+		}
+	}
+	
+	private void roomCreationHandler(JSONObject request) {
+		String roomName = (String) request.get("room_name");
+		String roomMaster = (String) request.get("room_master");
+		String roomPass = (String) request.get("room_pass");
+		long roomSize = (long) request.get("size");
+		
+		boolean exists = TCPServer.hasRoom(roomName);
+		if (exists) sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.ROOM_CREATION_FAILED, Message.ROOM_EXISTS));
+		else {
+			Room newRoom = new Room(roomName, roomMaster, roomPass, (int)roomSize);
+			TCPServer.addNewRoom(newRoom);
+			sendResponse(makeJSONResponse(StatusCode.SUCCESS, ErrorCode.NONE, null));
 		}
 	}
 	
@@ -83,7 +117,7 @@ public class TCPHandler extends Thread {
 		JSONObject response = new JSONObject();
 		
 		response.put("status", status_code);
-		if (error_code != ErrorCode.DEFAULT) response.put("error_code", error_code);
+		if (error_code != ErrorCode.NONE) response.put("error_code", error_code);
 		if (message != null) response.put("message", message);
 		
 		return response.toJSONString();
@@ -95,75 +129,50 @@ public class TCPHandler extends Thread {
 		
 		response.put("status", status_code);
 		if (data != null) response.put("data", data);
-		if (error_code != ErrorCode.DEFAULT) response.put("error_code", error_code);
+		if (error_code != ErrorCode.NONE) response.put("error_code", error_code);
 		if (message != null) response.put("message", message);
 		
 		return response.toJSONString();
 	}
 	
 	private void sendResponse(String response) {
-		PrintStream pr;
-		try {
-			pr = new PrintStream(socket.getOutputStream());
-			pr.println(response);
-			pr.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		pr.println(response);
 	}
 	
-	private boolean checkUserExists(String username) {
+	private boolean checkUserExists(String username) throws SQLException {
 		String sql = "SELECT * FROM Account WHERE username=?";
-		
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
 
-			ResultSet rs = ps.executeQuery();
-			return rs.next();
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, username);
+		ResultSet rs = ps.executeQuery();
 		
-		return false;
+		return rs.next();		
 	}
 	
-	private int checkSignIn(String username, String password) {
+	private int checkSignIn(String username, String password) throws SQLException {
 		String sql = "SELECT * FROM Account WHERE username=? AND password=?";
 		
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
-			ps.setString(2, password);
-			
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				return rs.getInt(1);
-			}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, username);
+		ps.setString(2, password);
 		
+		ResultSet rs = ps.executeQuery();
+		if (rs.next()) {
+			return rs.getInt(1);
+		}
+
 		return 0;
 	}
 	
-	private boolean saveUserToDatabase(String username, String password) {
+	private boolean saveUserToDatabase(String username, String password) throws SQLException {
 		String sql = "INSERT dbo.Account(username, password, date_create) VALUES(?, ?, ?)" ;
+		Date date = new Date(System.currentTimeMillis());
 		
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
-			ps.setString(2, password);
-			ps.setDate(3, date);
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, username);
+		ps.setString(2, password);
+		ps.setDate(3, date);
 
-			return ps.executeUpdate() != 0;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return false;
+		return ps.executeUpdate() != 0;
 	}
 }
