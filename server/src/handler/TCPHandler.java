@@ -11,13 +11,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import code.ErrorCode;
 import code.Message;
 import code.RequestCode;
+import code.ResponseCode;
 import code.StatusCode;
+import code.UpdateCode;
 import database.DatabaseHandler;
 import helpers.Room;
 import server.TCPServer;
@@ -27,8 +30,11 @@ public class TCPHandler extends Thread {
 	private Connection conn;
 	private PrintStream pr;
 	private BufferedReader br;
-
+	
+	private boolean isRunning;
+	
 	public TCPHandler(Socket socket) {
+		this.isRunning = true;
 		this.socket = socket;
 		conn = DatabaseHandler.getInstance().getConnection();
 		try {
@@ -42,7 +48,7 @@ public class TCPHandler extends Thread {
 	@Override
 	public void run() {
 		try {
-			while (true) {
+			while (isRunning) {
 				String s_req = br.readLine();
 				System.out.println(s_req);
 				JSONObject request = (JSONObject) JSONValue.parse(s_req);
@@ -63,13 +69,17 @@ public class TCPHandler extends Thread {
 						roomCreationHandler(request);
 						break;
 						
+					case RequestCode.JOIN_ROOM_REQ:
+						joinRoomHandler(request);
+						break;
+					
 					default: break;
 				}
 			}
 			
 		} catch (IOException | SQLException e) {
 			System.out.println("Error: " + e.getMessage());
-			sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.SERVER_FAILED, Message.SERVER_ERROR));
+			send(makeJSONDataString(ResponseCode.ERROR_RES, StatusCode.FAILED, ErrorCode.SERVER_FAILED, Message.SERVER_ERROR));
 		}
 	}
 	
@@ -79,10 +89,11 @@ public class TCPHandler extends Thread {
 		
 		int id = checkSignIn(username, password);
 		if (id != 0) {
-			TCPServer.addClientConnection(id, socket);
-			sendResponse(makeJSONResponseAttachData(StatusCode.SUCCESS, ""+id, ErrorCode.NONE, null));
+			TCPServer.addClientConnection(username, this);
+			send(makeJSONDataString(ResponseCode.SIGNIN_RES, StatusCode.SUCCESS, "user_id",  id));
 		} else {
-			sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.SIGNIN_FAILED, Message.USER_AND_PASS_NOT_EXISTS));
+			send(makeJSONDataString(ResponseCode.SIGNIN_RES, StatusCode.FAILED, ErrorCode.SIGNIN_FAILED, Message.ACCOUNT_NOT_EXISTS));
+			closeHandler();
 		}
 	}
 	
@@ -91,9 +102,10 @@ public class TCPHandler extends Thread {
 		String password = (String) request.get("password");
 		
 		if (!checkUserExists(username) && saveUserToDatabase(username, password)) {
-			sendResponse(makeJSONResponse(StatusCode.SUCCESS, ErrorCode.NONE, null));
+			send(makeJSONDataString(ResponseCode.SIGNUP_RES, StatusCode.SUCCESS, ErrorCode.NONE, null));
 		} else {
-			sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.SIGNUP_FAILED, Message.USER_EXISTS));
+			send(makeJSONDataString(ResponseCode.SIGNUP_RES, StatusCode.FAILED, ErrorCode.SIGNUP_FAILED, Message.ACCOUNT_EXISTS));
+			closeHandler();
 		}
 	}
 	
@@ -103,19 +115,68 @@ public class TCPHandler extends Thread {
 		String roomPass = (String) request.get("room_pass");
 		long roomSize = (long) request.get("size");
 		
-		boolean exists = TCPServer.hasRoom(roomName);
-		if (exists) sendResponse(makeJSONResponse(StatusCode.FAILED, ErrorCode.ROOM_CREATION_FAILED, Message.ROOM_EXISTS));
-		else {
+		int pos = TCPServer.hasRoom(roomName);
+		if (pos == -1) {
 			Room newRoom = new Room(roomName, roomMaster, roomPass, (int)roomSize);
 			TCPServer.addNewRoom(newRoom);
-			sendResponse(makeJSONResponse(StatusCode.SUCCESS, ErrorCode.NONE, null));
+			send(makeJSONDataString(ResponseCode.ROOM_CREATION_RES, StatusCode.SUCCESS, ErrorCode.NONE, null));
+		}
+		else {
+			send(makeJSONDataString(ResponseCode.ROOM_CREATION_RES, StatusCode.FAILED, ErrorCode.ROOM_CREATION_FAILED, Message.ROOM_EXISTS));
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private String makeJSONResponse(int status_code, int error_code, String message) {
+	private void joinRoomHandler(JSONObject request) {
+		String roomName = (String) request.get("room_name");
+		String memberName = (String) request.get("member_name");
+		String roomPass = (String) request.get("room_pass");
+		
+		int pos = TCPServer.hasRoom(roomName);
+		if (pos != -1) {
+			Room room = TCPServer.getRoom(pos);
+			if (room.isFull()) {
+				send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_FULL));
+			}
+			else if (isExactRoomPassword(room.getRoomPassword(), roomPass)) {
+				room.addMember(memberName);
+				JSONArray teamArray = new JSONArray();
+				teamArray.addAll(room.getListMember());
+				send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.SUCCESS, "team", teamArray));
+				sendUpdateToRoomMember(room, memberName);
+			} 
+			else {
+				String response;
+				if (roomPass == null) response = makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.REQUIRE_ROOM_PASS);
+				else response = makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_PASS_INCORRECT);
+				
+				send(response);
+			}
+		} 
+		else {
+			send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_NOT_EXISTS));
+		}
+	}
+	
+	private void sendUpdateToRoomMember(Room room, String newMemberName) {
+		String update = makeJSONDataString(UpdateCode.NEW_MEMBER, StatusCode.NONE, "new_member", newMemberName);
+		for (String memberName: room.getListMember()) {
+			if (!memberName.equals(newMemberName)) {
+				TCPServer.getConnection(memberName).send(update);
+			}
+		}
+	}
+
+	private boolean isExactRoomPassword(String realRoomPass, String roomPass) {
+		if (realRoomPass == null || realRoomPass.isEmpty()) return true;
+		return realRoomPass.equals(roomPass);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String makeJSONDataString(int tcpCode, int status_code, int error_code, String message) {
 		JSONObject response = new JSONObject();
 		
+		response.put("tcp_code", tcpCode);
 		response.put("status", status_code);
 		if (error_code != ErrorCode.NONE) response.put("error_code", error_code);
 		if (message != null) response.put("message", message);
@@ -124,19 +185,18 @@ public class TCPHandler extends Thread {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private String makeJSONResponseAttachData(int status_code, String data, int error_code, String message) {
+	private String makeJSONDataString(int tcpCode, int status_code, String dataName, Object dataValue) {
 		JSONObject response = new JSONObject();
 		
-		response.put("status", status_code);
-		if (data != null) response.put("data", data);
-		if (error_code != ErrorCode.NONE) response.put("error_code", error_code);
-		if (message != null) response.put("message", message);
+		response.put("tcp_code", tcpCode);
+		if (status_code != StatusCode.NONE) response.put("status", status_code);
+		response.put(dataName, dataValue);
 		
 		return response.toJSONString();
 	}
 	
-	private void sendResponse(String response) {
-		pr.println(response);
+	private void send(String data) {
+		pr.println(data);
 	}
 	
 	private boolean checkUserExists(String username) throws SQLException {
@@ -174,5 +234,17 @@ public class TCPHandler extends Thread {
 		ps.setDate(3, date);
 
 		return ps.executeUpdate() != 0;
+	}
+	
+	private void closeHandler() {
+		try {
+			socket.close();
+			pr.close();
+			br.close();
+			conn = null;
+			isRunning = false;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

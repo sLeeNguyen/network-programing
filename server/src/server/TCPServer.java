@@ -14,12 +14,12 @@ import helpers.Room;
 public class TCPServer {
 	private int port;
 	private static List<Room> listRoom;
-	private static Map<Integer, Socket> listConnection;
+	private static Map<String, TCPHandler> listConnection;
 	
 	public TCPServer(int port) {
 		this.port = port;
 		listRoom = new ArrayList<Room>();
-		listConnection = new HashMap<Integer, Socket>();
+		listConnection = new HashMap<String, TCPHandler>();
 	}
 	
 	public void start() {
@@ -45,14 +45,22 @@ public class TCPServer {
 		listRoom.add(newRoom);
 	}
 	
-	public static void addClientConnection(Integer clientID, Socket socketClient) {
-		listConnection.put(clientID, socketClient);
+	public static void addClientConnection(String username, TCPHandler tcpHandler) {
+		listConnection.put(username, tcpHandler);
 	}
 	
-	public static boolean hasRoom(String name) {
-		for (Room room: listRoom) {
-			if (name.equals(room.getRoomName())) return true;
+	public static TCPHandler getConnection(String key) {
+		return listConnection.get(key);
+	}
+	
+	public static int hasRoom(String name) {
+		for (int i = 0; i < listRoom.size(); ++i) {
+			if (listRoom.get(i).getRoomName().equals(name)) return i;
 		}
-		return false;
+		return -1;
+	}
+	
+	public static Room getRoom(int index) {
+		return listRoom.get(index);
 	}
 }

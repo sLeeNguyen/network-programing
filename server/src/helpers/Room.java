@@ -60,4 +60,8 @@ public class Room {
 	public String getRoomMaster() {
 		return team.get(0);
 	}
+	
+	public boolean isFull() {
+		return team.size() == this.roomSize;
+	}
 }
