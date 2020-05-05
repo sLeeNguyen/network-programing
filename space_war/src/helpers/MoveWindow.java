@@ -18,7 +18,7 @@ public class MoveWindow {
         Node node = (Node) event.getSource();
 
         Stage stage = (Stage) node.getScene().getWindow();
-        stage.setOpacity(0.9);
+        stage.setOpacity(0.8);
         stage.setX(event.getScreenX() - x);
         stage.setY(event.getScreenY() - y);
     }

@@ -5,31 +5,25 @@ import java.io.FileNotFoundException;
 
 import javafx.geometry.Pos;
 import javafx.scene.SubScene;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
-public class RoomCreationSubScene extends SubScene {
+public class JoinRoomSubScene extends SubScene {
 	private static final String FONT_PATH = "src/model/resources/kenvector_future.ttf";	
 	private static final String TEXT_FIELD_STYLE = "-fx-background-image: url('/model/resources/yellow_button13.png'); -fx-background-size: 300 49;"
 			+ "-fx-font-weight: bold; -fx-font-family: Verdana; -fx-font-size: 20px";
-	private static final String CHOICEBOX_STYLE = "-fx-background-image: url('/model/resources/yellow_button13.png'); -fx-background-size: 80 49;"
-			+ "-fx-font: 20px \"Verdana\";";
 	
-	private HBox nameHB;
-	private HBox sizeHB;
-	private HBox passHB;
+	private VBox nameHB;
+	private VBox passHB;
 	private Font font;
 	
 	private TextField nameTF;
 	private TextField passTF;
-	ChoiceBox<Integer> sizeOption;
 	
-	
-	public RoomCreationSubScene(double layoutX, double layoutY) {
+	public JoinRoomSubScene(double layoutX, double layoutY) {
 		super(new AnchorPane(), 500, 250);
 		setLayoutX(layoutX);
 		setLayoutY(layoutY);
@@ -44,9 +38,8 @@ public class RoomCreationSubScene extends SubScene {
 		setElement();
 	}
 	
-	private void setElement() {
+	public void setElement() {
 		setRoomName();
-		setRoomSize();
 		setRoomPassword();
 	}
 	
@@ -58,32 +51,13 @@ public class RoomCreationSubScene extends SubScene {
 		nameTF.setStyle(TEXT_FIELD_STYLE);
 		nameTF.setMinSize(300, 49);
 
-		nameHB = new HBox(20);
+		nameHB = new VBox(10);
 		nameHB.getChildren().addAll(nameLabel, nameTF);
 		nameHB.setAlignment(Pos.CENTER_LEFT);
-		nameHB.setLayoutX(15);
+		nameHB.setLayoutX(100);
 		nameHB.setLayoutY(0);
 		
 		getPane().getChildren().add(nameHB);
-	}
-	
-	private void setRoomSize() {
-		Label sizeLabel = new Label("ROOM SIZE");
-		sizeLabel.setFont(font);
-		
-		sizeOption = new ChoiceBox<Integer>();
-		sizeOption.setStyle(CHOICEBOX_STYLE);
-		sizeOption.setMinSize(80, 49);
-		sizeOption.getItems().addAll(1, 2, 3);
-		sizeOption.setValue(1);
-		
-		sizeHB = new HBox(35);
-		sizeHB.getChildren().addAll(sizeLabel, sizeOption);
-		sizeHB.setAlignment(Pos.CENTER_LEFT);
-		sizeHB.setLayoutX(15);
-		sizeHB.setLayoutY(80);
-		
-		getPane().getChildren().add(sizeHB);
 	}
 	
 	private void setRoomPassword() {
@@ -94,11 +68,11 @@ public class RoomCreationSubScene extends SubScene {
 		passTF.setStyle(TEXT_FIELD_STYLE);
 		passTF.setMinSize(300, 49);
 
-		passHB = new HBox(28);
+		passHB = new VBox(10);
 		passHB.getChildren().addAll(passLabel, passTF);
 		passHB.setAlignment(Pos.CENTER_LEFT);
-		passHB.setLayoutX(15);
-		passHB.setLayoutY(80*2);
+		passHB.setLayoutX(100);
+		passHB.setLayoutY(100);
 		
 		getPane().getChildren().add(passHB);
 	}
@@ -106,13 +80,9 @@ public class RoomCreationSubScene extends SubScene {
 	public AnchorPane getPane() {
 		return (AnchorPane) getRoot();
 	}
-
+	
 	public String getRoomName() {
 		return nameTF.getText();
-	}
-	
-	public int getRoomSize() {
-		return sizeOption.getValue();
 	}
 	
 	public String getPassword() {

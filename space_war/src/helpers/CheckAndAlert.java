@@ -6,6 +6,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
 public class CheckAndAlert {
+	
 	public static final void alertErrorMessage(String msg) {
 		Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");

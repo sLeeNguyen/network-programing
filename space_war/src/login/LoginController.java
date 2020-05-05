@@ -118,13 +118,12 @@ public class LoginController implements Initializable {
     }
 
 	@FXML
-    void onSignIn(ActionEvent event) {
-    	new Client();
-		
+    void onSignIn(ActionEvent event) {		
     	String username = usernameSignInJFX.getText();
     	String password = passwordSignInJFX.getText();
     	
     	if (checkSignIn(username, password)) {
+    		new Client();
     		int userID = Client.sendLoginRequestAndHandleResponse(username, password);
     		
     		if (userID != 0) {
@@ -157,7 +156,6 @@ public class LoginController implements Initializable {
     			}
     		}
     	}
-    	
     }
     
     private boolean checkSignIn(String username, String password) {
@@ -198,7 +196,7 @@ public class LoginController implements Initializable {
     	return true;
     }
     
-    private void setGame(UserInformation user) {
+    public static void setGame(UserInformation user) {
     	ViewManager manager = new ViewManager();
     	
     	ViewManager.user = user;

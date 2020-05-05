@@ -21,7 +21,7 @@ public class Main extends Application {
 			primaryStage.initStyle(StageStyle.UNDECORATED);
 			primaryStage.show();
 
-			
+//			
 //			test
 //			ViewManager manager = new ViewManager();
 //			Stage stage = manager.getMainStage();

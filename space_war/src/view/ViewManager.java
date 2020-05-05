@@ -4,9 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import helpers.CheckAndAlert;
 import helpers.UserInformation;
 import helpers.connect.Client;
+import helpers.connect.Client.TCPViewManager;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -25,12 +31,16 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import model.InfoLabel;
-import model.RoomInformationSubScene;
+import model.JoinRoomSubScene;
+import model.RoomCreationSubScene;
 import model.SHIP;
 import model.ShipPicker;
 import model.SpaceWarButton;
 import model.SpaceWarSubScene;
 import model.element.Ship;
+
+import helpers.code.ResponseCode;
+import helpers.code.UpdateCode;
 
 public class ViewManager {
     private static final int HEIGHT = 768;
@@ -118,6 +128,7 @@ public class ViewManager {
 		}
     	
 		showSubScene(startSubScene);
+		createTCPHandler();
     }
     
     private void addMenuButton(SpaceWarButton button) {
@@ -296,10 +307,10 @@ public class ViewManager {
 
 			@Override
 			public void handle(MouseEvent event) {
-				RoomInformationSubScene roomInfo = new RoomInformationSubScene(50, 50);
+				RoomCreationSubScene roomInfor = new RoomCreationSubScene(50, 50);
 				roomSubScene.getPane().getChildren().clear();
-				roomSubScene.getPane().getChildren().add(roomInfo);		
-				setButtonOfRoomInfor(roomInfo);
+				roomSubScene.getPane().getChildren().add(roomInfor);		
+				setButtonOfRoomInfor(roomInfor);
 			}
 		});
     	
@@ -307,13 +318,15 @@ public class ViewManager {
 
 			@Override
 			public void handle(ActionEvent event) {
-				
-				
+				JoinRoomSubScene joinRoomInfor = new JoinRoomSubScene(50, 50);
+				roomSubScene.getPane().getChildren().clear();
+				roomSubScene.getPane().getChildren().add(joinRoomInfor);
+				setButtonOfJoinRoom(joinRoomInfor);
 			}
 		});
     }
     
-    private void setButtonOfRoomInfor(RoomInformationSubScene roomInfor) {
+    private void setButtonOfRoomInfor(RoomCreationSubScene roomInfor) {
 		SpaceWarButton cancelButton = new SpaceWarButton("CANCEL");
 		SpaceWarButton createButton = new SpaceWarButton("CREATE");
 		
@@ -338,15 +351,50 @@ public class ViewManager {
 				String roomName = roomInfor.getRoomName();
 				String roomPass = roomInfor.getPassword();
 				int size = roomInfor.getRoomSize();
+				
+				if (roomName == null || roomName.isEmpty()) CheckAndAlert.alertErrorMessage("Vui lòng nhập tên phòng");
 
-				boolean status = Client.sendRoomCreationRequestAndHAndleResponse(roomName, user.getName(), size, roomPass);
-				if (status) {
-					//create room ui
-					CheckAndAlert.alertSuccessMessage("Tạo phòng thành công!");
-				}
+				Client.sendRoomCreationRequest(roomName, user.getName(), size, roomPass);
 			}
 		});
 	}
+    
+    private void setButtonOfJoinRoom(JoinRoomSubScene joinRoomInfor) {
+    	SpaceWarButton cancelButton = new SpaceWarButton("CANCEL");
+		SpaceWarButton joinButton = new SpaceWarButton("JOIN");
+		
+		cancelButton.setLayoutX(60); cancelButton.setLayoutY(300);
+		joinButton.setLayoutX(340); joinButton.setLayoutY(300);
+		
+		roomSubScene.getPane().getChildren().addAll(cancelButton, joinButton);
+		
+		cancelButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				roomSubScene.getPane().getChildren().clear();
+				createButtonOfRoomSubScene();
+			}
+		});
+		
+		joinButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				String roomName = joinRoomInfor.getRoomName();
+				String roomPass = joinRoomInfor.getPassword();
+				
+				if (roomName == null || roomName.isEmpty()) CheckAndAlert.alertErrorMessage("Vui lòng nhập tên phòng");
+				
+				Client.sendJoinRoomRequest(roomName, roomPass, user.getName());
+			}
+		});
+    }
+
+    public void createAndSetRoomUI() {
+    	
+    }
+    
     /*======================== End roomSubScene ========================*/
     
     
@@ -380,4 +428,92 @@ public class ViewManager {
         
         mainPane.getChildren().add(logo);
     }
+    
+    /*
+     * Handle response from Server
+    */
+    private void createTCPHandler() {
+    	TCPViewManager tcpHandler = new TCPViewManager(data ->  {
+    		Platform.runLater(() -> {
+    			JSONObject json_data = (JSONObject) JSONValue.parse(data);
+        		
+        		long tcp_code = (long) json_data.get("tcp_code");
+        		
+        		switch ((int)tcp_code) {
+        			case ResponseCode.ROOM_CREATION_RES:
+        				roomCreationHanler(json_data);
+        				break;
+        				
+        			case ResponseCode.JOIN_ROOM_RES:
+    					joinRoomHandler(json_data);
+    					break;
+    					
+    				case UpdateCode.NEW_MEMBER:
+    					newMemberHandler(json_data);
+    					break;
+        		}
+    		});
+    	});
+    	
+    	tcpHandler.start();
+    }
+    /*======================== end handle ========================*/
+
+	private void newMemberHandler(JSONObject requireUpdate) {
+		String newMemberName = (String) requireUpdate.get("new_member");
+		CheckAndAlert.alertSuccessMessage(newMemberName + " đã tham gia");
+	}
+
+	private void joinRoomHandler(JSONObject response) {
+		long status = (long) response.get("status");
+		
+		if (status == 0) {
+			long error_code = (long) response.get("error_code");
+			String message = (String) response.get("message");
+			CheckAndAlert.alertErrorMessage((int)error_code, message);
+		} else {
+	//		viewManager.createAndSetRoomUI();
+			JSONArray teamArray = (JSONArray) response.get("team");
+			CheckAndAlert.alertSuccessMessage("Vào thành công " + teamArray.toJSONString());
+		}
+	}
+
+	private void roomCreationHanler(JSONObject response) {
+		long status = (long) response.get("status");
+		
+		if (status == 0) {
+			long error_code = (long) response.get("error_code");
+			String message = (String) response.get("message");
+			CheckAndAlert.alertErrorMessage((int)error_code, message);
+		} else {
+	//		viewManager.createAndSetRoomUI();
+			CheckAndAlert.alertSuccessMessage("Tạo phòng thành công");
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
