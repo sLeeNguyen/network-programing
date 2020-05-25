@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.TextFlow?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="602.0" prefWidth="795.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="132.0" layoutY="82.0" nodeOrientation="RIGHT_TO_LEFT" text="asdfasdf">
+         <graphic>
+            <TextField nodeOrientation="LEFT_TO_RIGHT" prefHeight="31.0" prefWidth="231.0" style="r: transparent;" text="asdfsadfasdf" />
+         </graphic>
+      </Label>
+      <TextArea cacheShape="false" centerShape="false" focusTraversable="false" layoutX="210.0" layoutY="194.0" prefHeight="0.0" prefWidth="315.0" scaleShape="false" wrapText="true" />
+      <TextFlow layoutX="125.0" layoutY="313.0" prefHeight="87.0" prefWidth="232.0" />
+      <VBox layoutX="388.0" layoutY="307.0">
+         <children>
+            <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="-131.0" layoutY="61.0" pickOnBounds="true" preserveRatio="true" rotate="30.0">
+                     <image>
+                        <Image url="@../../view/resources/logox.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

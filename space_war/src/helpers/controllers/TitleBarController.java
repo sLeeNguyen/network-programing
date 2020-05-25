@@ -28,6 +28,7 @@ public class TitleBarController implements Initializable {
     	Stage stage = (Stage) node.getScene().getWindow();
     	if (CheckAndAlert.alertConfirmMessage("Bạn có chắc chắn muốn thoát?")) {
     		stage.close();
+    		System.exit(1);
     	}
      }
 
