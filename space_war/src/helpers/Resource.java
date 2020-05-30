@@ -9,4 +9,17 @@ public class Resource {
 	public static final int ENEMY_HEIGHT = 84;
 	public static final int ENEMY_WIDTH = 100;
 	public static final int ENEMY_RADIUS = 35;
+	
+	public static final String[] LEVEL_PATH = {"/resources/levels/level1.png", "/resources/levels/level2.png", "/resources/levels/level3.png", "/resources/levels/level4.png", "/resources/levels/level5.png"};
+	public static final String WIN_GAME_PATH = "/resources/levels/wingame.png";
+	public static final String LOST_GAME_PATH = "/resources/levels/lostgame.gif";
+	
+	public static final String FONT_PATH_1 = "src/resources/fonts/Cunia.ttf";
+	public static final String FONT_PATH_2 = "src/resources/fonts/kenvector_future.ttf";
+
+	public static final String CHAT_PATH = "/resources/chat/chatlogo.png";
+	public static final String SEND_BTN_PATH = "/resources/chat/send.png";
+	public static final String FACE_PATH = "/resources/chat/face.png";
+	public static final String OWNER_PATH = "/resources/room/owner.png";
+	public static final String READY_PATH = "/resources/room/ready.png";
 }
