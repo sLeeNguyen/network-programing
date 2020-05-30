@@ -1,0 +1,61 @@
+#chatBar {
+	-fx-background-color: black;
+	-fx-padding: 5 0 5 0;
+}
+
+#btnSend {
+	-fx-background-image: url('/resources/chat/send.png');
+	-fx-background-color: transparent;
+	-fx-cursor: hand;
+}
+
+#inputText {
+	-fx-padding: 5 19;
+	-fx-background-color: transparent, #323232, transparent, #323232;
+	-fx-background-radius: 8em;
+	-fx-font-size: 16px;
+	-fx-prompt-text-fill: gray;
+	-fx-text-fill: white;
+	-fx-background-insets: 0, 6, 0;
+}
+
+#scrollPane{
+    -fx-background-color: #222222d4;
+    -fx-padding: 15 5 8 15;
+}
+#scrollPane >.viewport{
+    -fx-background-color: transparent;
+}
+
+#scrollPane .scroll-bar:vertical{
+    -fx-background-color:inherit;
+}
+
+#scrollPane .scroll-bar:vertical .track{
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+
+}
+#scrollPane .scroll-bar:vertical .increment-button,
+#scrollPane .scroll-bar:vertical .decrement-button{
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
+
+}
+
+#scrollPane  .scroll-bar .increment-arrow,
+#scrollPane  .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+#scrollPane .scroll-bar:vertical .thumb {
+    -fx-background-color: transparent;
+
+}
+#scrollPane:hover .scroll-bar:vertical .thumb{
+    -fx-background-color: #ffffff9e;
+    -fx-background-insets: 4, 0, 0;
+    -fx-background-radius: 2em;
+}
