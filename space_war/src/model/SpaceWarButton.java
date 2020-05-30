@@ -11,9 +11,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Font;
 
 public class SpaceWarButton extends Button {
-    private static final String FONT_PATH = "src/model/resources/kenvector_future.ttf";
-    private static final String BUTTON_STYLE_1 = "-fx-background-color: transparent; -fx-background-image: url('/model/resources/yellow_button.png'); -fx-cursor: hand;";
-    private static final String BUTTON_STYLE_2 = "-fx-background-color: transparent; -fx-background-image: url('/model/resources/yellow_button13.png'); -fx-background-size: 250 49; -fx-cursor: hand;";
+    private static final String FONT_PATH = "src/resources/fonts/Cunia.ttf";
+    private static final String BUTTON_STYLE_1 = "-fx-background-color: transparent; -fx-background-image: url('/resources/buttons/yellow_button.png'); -fx-cursor: hand;";
+    private static final String BUTTON_STYLE_2 = "-fx-background-color: transparent; -fx-background-image: url('/resources/buttons/yellow_button13.png'); -fx-background-size: 250 49; -fx-cursor: hand;";
     		
     public SpaceWarButton(String text) {
         setText(text);
@@ -31,10 +31,10 @@ public class SpaceWarButton extends Button {
     
     private void setButtonFont() {
         try {
-            setFont(Font.loadFont(new FileInputStream(FONT_PATH), 23));
+            setFont(Font.loadFont(new FileInputStream(FONT_PATH), 21));
         } catch (FileNotFoundException var2) {
             setFont(Font.font("Verdana", 23));
-            System.out.println("Lỗi load font");
+            System.out.println("Lỗi load font " + FONT_PATH);
         }
     }
 

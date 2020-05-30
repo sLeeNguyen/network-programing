@@ -12,7 +12,7 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.util.Duration;
 
 public class SpaceWarSubScene extends SubScene {
-    private static final String BACKGROUND_IMAGE = "/model/resources/yellow_panel.png";
+    private static final String BACKGROUND_IMAGE = "/resources/buttons/yellow_panel.png";
     private boolean isHide = true;
 
     public SpaceWarSubScene() {
@@ -26,8 +26,9 @@ public class SpaceWarSubScene extends SubScene {
         AnchorPane root = (AnchorPane)getRoot();
         root.setBackground(new Background(bi));
         
-        setLayoutX(1100);
+        setLayoutX(1280);
         setLayoutY(200);
+        setOpacity(0.9);
     }
 
     public void moveSubScene() {
@@ -36,7 +37,7 @@ public class SpaceWarSubScene extends SubScene {
         trans.setNode(this);
         
         if (isHide) {
-            trans.setToX(-700);
+            trans.setToX(-800);
             isHide = false;
         } else {
             trans.setToX(0);

@@ -4,18 +4,18 @@ public class Meteor extends Element {
     private int angle;
     private int speed;
 
-    public Meteor(String url, String type, double radius, double width, double height) {
-        super(url, type, radius, width, height);
+    public Meteor(String url, String type, double radius, double width, double height, int id) {
+        super(url, EType.METEOR, radius, width, height, id);
     }
 
-    public Meteor(String url, String type, double posX, double posY, double radius, double width, double height) {
-        super(url, type, radius, width, height);
+    public Meteor(String url, String type, double posX, double posY, double radius, double width, double height, int id) {
+        super(url, EType.METEOR, radius, width, height, id);
         setLayoutX(posX);
         setLayoutY(posY);
     }
 
-    public Meteor(String url, String type, double posX, double posY, int angle, int speed, double radius, double width, double height) {
-        super(url, type, radius, width, height);
+    public Meteor(String url, String type, double posX, double posY, int angle, int speed, double radius, double width, double height, int id) {
+        super(url, EType.METEOR, radius, width, height, id);
         setLayoutX(posX);
         setLayoutY(posY);
         this.angle = angle;

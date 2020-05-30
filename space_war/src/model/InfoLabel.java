@@ -13,8 +13,8 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.text.Font;
 
 public class InfoLabel extends Label {
-    public static final String FONT_PATH = "src/model/resources/kenvector_future.ttf";
-    public static final String BACKGROUND_PATH = "/view/resources/yellow_notification.png";
+    public static final String FONT_PATH = "src/resources/fonts/kenvector_future.ttf";
+    public static final String BACKGROUND_PATH = "/resources/buttons/yellow_notification.png";
 
     public InfoLabel(String text) {
         setPrefWidth(380);
@@ -22,19 +22,28 @@ public class InfoLabel extends Label {
         setText(text);
         setWrapText(true);
         setAlignment(Pos.CENTER);
-        setLabelFont();
-        setBackgroundImage();
+        setLabelFont(23);
+        setBackgroundImage(380, 49);
     }
-
-    private void setBackgroundImage() {
-        BackgroundImage bi = new BackgroundImage(new Image(BACKGROUND_PATH, 380, 49, false, true), BackgroundRepeat.NO_REPEAT, 
+    
+    public InfoLabel(String text, double width, double height) {
+        setPrefSize(width, height);
+        setText(text);
+        setWrapText(true);
+        setAlignment(Pos.CENTER);
+        setLabelFont(23);
+        setBackgroundImage(width, height);
+    }
+    
+    private void setBackgroundImage(double width, double height) {
+        BackgroundImage bi = new BackgroundImage(new Image(BACKGROUND_PATH, width, height, false, true), BackgroundRepeat.NO_REPEAT, 
         		BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, (BackgroundSize)null);
         setBackground(new Background(bi));
     }
 
-    private void setLabelFont() {
+    public void setLabelFont(int fontSize) {
         try {
-            setFont(Font.loadFont(new FileInputStream(FONT_PATH), 23));
+            setFont(Font.loadFont(new FileInputStream(FONT_PATH), fontSize));
         } catch (FileNotFoundException var2) {
             setFont(Font.font("Verdana", 23));
         }

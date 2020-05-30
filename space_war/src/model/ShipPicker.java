@@ -6,8 +6,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 public class ShipPicker extends VBox {
-    private final String CIRLE_NOT_CHOOSEN = "/view/resources/shipchooser/grey_circle.png";
-    private final String CIRCLE_CHOOSEN = "/view/resources/shipchooser/yellow_boxTick.png";
+    private final String CIRLE_NOT_CHOOSEN = "/resources/shipchooser/grey_circle.png";
+    private final String CIRCLE_CHOOSEN = "/resources/shipchooser/yellow_boxTick.png";
     
     private ImageView circleImage = new ImageView(CIRLE_NOT_CHOOSEN);
     private SHIP shipE;

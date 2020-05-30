@@ -13,10 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 
 public class RoomCreationSubScene extends SubScene {
-	private static final String FONT_PATH = "src/model/resources/kenvector_future.ttf";	
-	private static final String TEXT_FIELD_STYLE = "-fx-background-image: url('/model/resources/yellow_button13.png'); -fx-background-size: 300 49;"
+	private static final String FONT_PATH = "src/resources/fonts/kenvector_future.ttf";	
+	private static final String TEXT_FIELD_STYLE = "-fx-background-image: url('/resources/buttons/yellow_button13.png'); -fx-background-size: 300 49;"
 			+ "-fx-font-weight: bold; -fx-font-family: Verdana; -fx-font-size: 20px";
-	private static final String CHOICEBOX_STYLE = "-fx-background-image: url('/model/resources/yellow_button13.png'); -fx-background-size: 80 49;"
+	private static final String CHOICEBOX_STYLE = "-fx-background-image: url('/resources/buttons/yellow_button13.png'); -fx-background-size: 80 49;"
 			+ "-fx-font: 20px \"Verdana\";";
 	
 	private HBox nameHB;
@@ -57,6 +57,7 @@ public class RoomCreationSubScene extends SubScene {
 		nameTF = new TextField();
 		nameTF.setStyle(TEXT_FIELD_STYLE);
 		nameTF.setMinSize(300, 49);
+		nameTF.requestFocus();
 
 		nameHB = new HBox(20);
 		nameHB.getChildren().addAll(nameLabel, nameTF);
