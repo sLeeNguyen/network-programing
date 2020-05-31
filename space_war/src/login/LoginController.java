@@ -116,6 +116,12 @@ public class LoginController implements Initializable {
     	setPaneVisible(signInVBox, false);
     	setPaneVisible(signUpVBox, true);
     }
+    
+    @FXML
+    void onOpenSignInPane(MouseEvent event) {
+    	setPaneVisible(signInVBox, true);
+    	setPaneVisible(signUpVBox, false);
+    }
 
 	@FXML
     void onSignIn(ActionEvent event) {		
@@ -143,6 +149,7 @@ public class LoginController implements Initializable {
     	String confirm_password = confirmPassSignUpJFX.getText();
     	
     	if (checkSignUp(username, password, confirm_password)) {
+    		new Client();
     		boolean success = Client.sendRegistrationRequestAndHandleResponse(username, password);
     		
     		if (success) {

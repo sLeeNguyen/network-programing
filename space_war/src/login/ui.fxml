@@ -18,12 +18,12 @@
          <children>
             <VBox fx:id="signUpVBox" alignment="CENTER" layoutX="438.0" layoutY="130.0" maxHeight="440.0" style="-fx-background-color: #1c1c1cba; -fx-background-radius: 7px;">
                <children>
-                  <Label text="Đăng ký" textFill="WHITE">
+                  <Label text="Sign Up" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="28.0" />
                      </font>
                      <VBox.margin>
-                        <Insets bottom="40.0" />
+                        <Insets bottom="10.0" />
                      </VBox.margin>
                   </Label>
                   <HBox alignment="CENTER" spacing="20.0">
@@ -33,7 +33,7 @@
                               <Insets top="10.0" />
                            </HBox.margin>
                         </FontAwesomeIconView>
-                        <JFXTextField fx:id="usernameSignUpJFX" focusColor="WHITE" labelFloat="true" prefWidth="250.0" promptText="Tên tài khoản" styleClass="jfx-text-field" unFocusColor="WHITE">
+                        <JFXTextField fx:id="usernameSignUpJFX" focusColor="WHITE" labelFloat="true" prefWidth="250.0" promptText="Username" styleClass="jfx-text-field" unFocusColor="WHITE">
                            <font>
                               <Font size="16.0" />
                            </font>
@@ -50,7 +50,7 @@
                               <Insets top="10.0" />
                            </HBox.margin>
                         </FontAwesomeIconView>
-                        <JFXPasswordField fx:id="passwordSignUpJFX" prefWidth="250.0" promptText="Mật khẩu" styleClass="jfx-password-field" />
+                        <JFXPasswordField fx:id="passwordSignUpJFX" prefWidth="250.0" promptText="Password" styleClass="jfx-password-field" />
                      </children>
                      <VBox.margin>
                         <Insets bottom="20.0" top="20.0" />
@@ -63,7 +63,7 @@
                               <Insets top="10.0" />
                            </HBox.margin>
                         </FontAwesomeIconView>
-                        <JFXPasswordField fx:id="confirmPassSignUpJFX" prefWidth="250.0" promptText="Xác nhận lại mật khẩu" styleClass="jfx-password-field" />
+                        <JFXPasswordField fx:id="confirmPassSignUpJFX" prefWidth="250.0" promptText="Confirm password" styleClass="jfx-password-field" />
                      </children>
                      <VBox.margin>
                         <Insets bottom="20.0" top="20.0" />
@@ -73,7 +73,21 @@
                      <children>
                         <HBox alignment="CENTER" prefHeight="116.0" prefWidth="309.0">
                            <children>
-                              <JFXButton onAction="#onSignUp" prefHeight="46.0" prefWidth="178.0" styleClass="jfxbutton" text="Đăng ký" />
+                              <JFXButton onAction="#onSignUp" prefHeight="46.0" prefWidth="178.0" styleClass="jfxbutton" text="Sign up" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="83.0" prefWidth="309.0" spacing="5.0">
+                           <children>
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Already have account?">
+                                 <font>
+                                    <Font size="17.0" />
+                                 </font>
+                              </Text>
+                              <Text fill="WHITE" onMouseClicked="#onOpenSignInPane" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text1" text="Sign in">
+                                 <font>
+                                    <Font name="System Italic" size="17.0" />
+                                 </font>
+                              </Text>
                            </children>
                         </HBox>
                      </children>
@@ -85,7 +99,7 @@
             </VBox>
             <VBox fx:id="signInVBox" alignment="CENTER" layoutX="438.0" layoutY="130.0" maxHeight="440.0" style="-fx-background-color: #1c1c1cba; -fx-background-radius: 7px;">
                <children>
-                  <Label text="Đăng nhập" textFill="WHITE">
+                  <Label text="Sign In" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="28.0" />
                      </font>
@@ -100,7 +114,7 @@
                               <Insets top="10.0" />
                            </HBox.margin>
                         </FontAwesomeIconView>
-                        <JFXTextField fx:id="usernameSignInJFX" focusColor="WHITE" labelFloat="true" prefWidth="250.0" promptText="Tên tài khoản" styleClass="jfx-text-field" unFocusColor="WHITE">
+                        <JFXTextField fx:id="usernameSignInJFX" focusColor="WHITE" labelFloat="true" prefWidth="250.0" promptText="Username" styleClass="jfx-text-field" unFocusColor="WHITE">
                            <font>
                               <Font size="16.0" />
                            </font>
@@ -117,7 +131,7 @@
                               <Insets top="10.0" />
                            </HBox.margin>
                         </FontAwesomeIconView>
-                        <JFXPasswordField fx:id="passwordSignInJFX" prefWidth="250.0" promptText="Mật khẩu" styleClass="jfx-password-field" />
+                        <JFXPasswordField fx:id="passwordSignInJFX" prefWidth="250.0" promptText="Password" styleClass="jfx-password-field" />
                      </children>
                      <VBox.margin>
                         <Insets bottom="20.0" top="20.0" />
@@ -125,24 +139,24 @@
                   </HBox>
                   <HBox alignment="CENTER_RIGHT">
                      <children>
-                        <Label onMouseClicked="#onForgotPassword" styleClass="label-style" text="Quên mật khẩu?" />
+                        <Label onMouseClicked="#onForgotPassword" styleClass="label-style" text="Forgot password?" />
                      </children>
                   </HBox>
                   <VBox VBox.vgrow="ALWAYS">
                      <children>
                         <HBox alignment="CENTER" prefHeight="83.0" prefWidth="309.0">
                            <children>
-                              <JFXButton onAction="#onSignIn" prefHeight="46.0" prefWidth="178.0" styleClass="jfxbutton" text="Đăng nhập" />
+                              <JFXButton onAction="#onSignIn" prefHeight="46.0" prefWidth="178.0" styleClass="jfxbutton" text="Sign in" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="83.0" prefWidth="309.0" spacing="5.0" VBox.vgrow="ALWAYS">
                            <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Bạn chưa có tài khoản?">
+                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Don't have an account?">
                                  <font>
                                     <Font size="17.0" />
                                  </font>
                               </Text>
-                              <Text fill="WHITE" onMouseClicked="#onOpenSignUpPane" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text1" text="Đăng kí ngay">
+                              <Text fill="WHITE" onMouseClicked="#onOpenSignUpPane" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text1" text="Sign up now">
                                  <font>
                                     <Font name="System Italic" size="17.0" />
                                  </font>
