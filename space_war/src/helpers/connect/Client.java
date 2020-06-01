@@ -11,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.function.Consumer;
 
 import org.json.simple.JSONArray;
@@ -21,7 +20,7 @@ import org.json.simple.JSONValue;
 import helpers.CheckAndAlert;
 
 public class Client {
-	private static final String SERVER_IP = "192.168.0.112";
+//	private static final String SERVER_IP = "192.168.0.112";
 	private static final int SERVER_TCP_PORT = 8008;
 	private static final int SERVER_UDP_PORT = 9009;
 	private static final int TIME_OUT = 10000;
@@ -43,8 +42,7 @@ public class Client {
 			addr = InetAddress.getByName("localhost");
 			
 		} catch (IOException e) {
-			CheckAndAlert.alertErrorMessage("Kết nối tới server thất bại");
-			e.printStackTrace();
+			CheckAndAlert.alertErrorMessage("Connection failed!");
 		}
 	}
 	
@@ -88,15 +86,14 @@ public class Client {
 		
 		@Override
 		public void run() {
-			while (isRunning) {
-				try {
-					String s_res = receiveData();
-					
-					handleResponse.accept(s_res);
-					
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			try {
+				String s_res = receiveData();
+				while (isRunning) {
+						handleResponse.accept(s_res);
+						s_res = receiveData();
+				}		
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 		
@@ -105,6 +102,10 @@ public class Client {
 			DatagramPacket dataPacket = new DatagramPacket(temp, temp.length);
 			udpSocketClient.receive(dataPacket);
 			return new String(dataPacket.getData()).trim();
+		}
+		
+		public void stopThread() {
+			isRunning = false;
 		}
 	}
 	
@@ -174,41 +175,98 @@ public class Client {
 			
 		} catch (IOException e) {
 			closeConnection();
-			e.printStackTrace();
+			CheckAndAlert.alertErrorMessage("Connection failed!");
 		}
 		
 		return false;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void sendRoomCreationRequest(String roomName, String roomOwner, int roomSize, String roomPass, String shipUrl) {
+	public static void sendRoomCreationRequest(String roomName, String roomOwner, int roomSize, String roomPass, String shipName) {
 		JSONObject request = new JSONObject();
 		request.put("req_code", 21);
 		request.put("room_name", roomName);
 		request.put("room_owner", roomOwner);
 		request.put("size", roomSize);
-		request.put("ship", shipUrl);
+		request.put("ship", shipName);
 		if (roomPass != null && !roomPass.isEmpty()) request.put("room_pass", roomPass);
 		
 		pr.println(request.toJSONString());
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void sendJoinRoomRequest(String roomName, String roomPass, String memberName, String shipUrl) {
+	public static void sendJoinRoomRequest(String roomName, String roomPass, String memberName, String shipName) {
 		JSONObject request = new JSONObject();
 		request.put("req_code", 22);
 		request.put("room_name", roomName);
 		request.put("member_name", memberName);
-		request.put("ship", shipUrl);
+		request.put("ship", shipName);
 		if (roomPass != null && !roomPass.isEmpty()) request.put("room_pass", roomPass);
 		
 		pr.println(request.toJSONString());	
 	}
 
 	@SuppressWarnings("unchecked")
+	public static void sendPlayGameRequest() {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 23);
+		
+		pr.println(request.toJSONString());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void sendMessage(String sender, String message) {
+		JSONArray data = new JSONArray();
+		data.add(sender);
+		data.add(message);
+		
+		JSONObject request = new JSONObject();
+		request.put("req_code", 24);
+		request.put("sender", sender);
+		request.put("data", data);
+		
+		pr.println(request.toJSONString());
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void sendReadyRequest(int playerId) {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 25);
+		request.put("player_id", playerId);
+		
+		pr.println(request.toJSONString());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void sendLeaveRoomRequest(int playerId) {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 26);
+		request.put("player_id", playerId);
+		
+		pr.println(request.toJSONString());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void sendClearRoomRequest() {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 27);
+		
+		pr.println(request.toJSONString());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void sendPlayerDeadRequest(int playerId) {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 42);
+		request.put("player_id", playerId);
+		
+		pr.println(request.toJSONString());
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static void sendEnemyDeadRequest(int enemyId, int killerId) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 44);
+		request.put("req_code", 43);
 		request.put("enemy_id", enemyId);
 		request.put("killer_id", killerId);
 		
@@ -216,16 +274,7 @@ public class Client {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void sendPlayGameRequest(int roomId) {
-		JSONObject request = new JSONObject();
-		request.put("req_code", 40);
-		request.put("room_id", roomId);
-		
-		pr.println(request.toJSONString());
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static void sendMoveDataRequest(int roomId, int shipId, double layoutX, int action) {
+	public static void sendPlayerActionData(int roomId, int shipId, double layoutX, int action) {
 		JSONObject request = new JSONObject();
 		JSONArray j_array = new JSONArray();
 		
@@ -239,7 +288,7 @@ public class Client {
 		
 		sendPacket(request.toJSONString());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static void sendUdpConnection(int roomId, String name) {
 		if (udpSocketClient == null)
@@ -273,7 +322,7 @@ public class Client {
 				tcpSocketClient.close();
 				br.close(); pr.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				//pass
 			}
 	}
 }

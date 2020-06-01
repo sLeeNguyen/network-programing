@@ -12,7 +12,7 @@ public class Resource {
 	
 	public static final String[] LEVEL_PATH = {"/resources/levels/level1.png", "/resources/levels/level2.png", "/resources/levels/level3.png", "/resources/levels/level4.png", "/resources/levels/level5.png"};
 	public static final String WIN_GAME_PATH = "/resources/levels/wingame.png";
-	public static final String LOST_GAME_PATH = "/resources/levels/lostgame.gif";
+	public static final String LOST_GAME_PATH = "/resources/levels/lostgame.png";
 	
 	public static final String FONT_PATH_1 = "src/resources/fonts/Cunia.ttf";
 	public static final String FONT_PATH_2 = "src/resources/fonts/kenvector_future.ttf";

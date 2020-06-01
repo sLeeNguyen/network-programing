@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import view.ViewManager;
 
 
 public class Main extends Application {
@@ -20,13 +19,6 @@ public class Main extends Application {
 			primaryStage.setScene(scene);
 			primaryStage.initStyle(StageStyle.UNDECORATED);
 			primaryStage.show();
-
-//			
-//			test
-//			ViewManager manager = new ViewManager();
-//			Stage stage = manager.getMainStage();
-//			stage.initStyle(StageStyle.UNDECORATED);
-//			stage.show();
 			
 		} catch(Exception e) {
 			e.printStackTrace();

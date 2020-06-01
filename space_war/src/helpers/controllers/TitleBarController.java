@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 
 import helpers.CheckAndAlert;
 import helpers.MoveWindow;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -24,11 +25,8 @@ public class TitleBarController implements Initializable {
 
     @FXML
     void onCancel(MouseEvent event) {
-    	Node node = (Node) event.getSource();
-    	Stage stage = (Stage) node.getScene().getWindow();
     	if (CheckAndAlert.alertConfirmMessage("Bạn có chắc chắn muốn thoát?")) {
-    		stage.close();
-    		System.exit(1);
+    		Platform.exit();
     	}
      }
 
