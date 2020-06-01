@@ -1,66 +1,90 @@
 package server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import handler.TCPHandler;
+import helpers.PairConnection;
 import helpers.Room;
+import helpers.UdpConnection;
 
-public class TCPServer {
+public class TCPServer extends Thread {
 	private int port;
-	private static List<Room> listRoom;
-	private static Map<String, TCPHandler> listConnection;
+	private static Map<Integer, Room> listRoom;
+	private static Map<String, PairConnection> listConnection;
 	
 	public TCPServer(int port) {
 		this.port = port;
-		listRoom = new ArrayList<Room>();
-		listConnection = new HashMap<String, TCPHandler>();
+		listRoom = new HashMap<Integer, Room>();
+		listConnection = new HashMap<>();
 	}
 	
-	public void start() {
+	@Override
+	public void run() {
 		try {
 			@SuppressWarnings("resource")
 			ServerSocket serverSocket = new ServerSocket(port);
 
 			while (true) {
-				System.out.println("Server is listening ...");
 				Socket socketClient = serverSocket.accept();
-				System.out.println("Accept new connection from client.\nNumOfRoom " + listRoom.size() + "\nNumOfConnection " + listConnection.size());
+				System.out.println("Accept new connection from client. NumOfRooms: " + listRoom.size() + " | NumOfConnections: " + listConnection.size());
 				TCPHandler handler = new TCPHandler(socketClient);
 				handler.start();
 			}
 			
 		} catch (IOException e) {
 			System.out.println("Loi tao server socket");
-			e.printStackTrace();
 		}
 	}
 	
-	public static void addNewRoom(Room newRoom) {
-		listRoom.add(newRoom);
+	public static boolean checkRoomId(Integer roomId) {
+		return listRoom.containsKey(roomId);
 	}
 	
-	public static void addClientConnection(String username, TCPHandler tcpHandler) {
-		listConnection.put(username, tcpHandler);
+	public static void addNewRoom(Integer roomId, Room newRoom) {
+		listRoom.put(roomId, newRoom);
 	}
 	
-	public static TCPHandler getConnection(String key) {
+	public static Room hasRoom(String name) {
+		for (Room room: listRoom.values()) {
+			if (room.getRoomName().equals(name)) return room;
+		}
+		return null;
+	}
+	
+	public static Room getRoomById(Integer roomId) {
+		return listRoom.get(roomId);
+	}
+	
+	public static void deleteRoom(Integer roomId) {
+		listRoom.remove(roomId);
+	}
+	
+	public static int getListRoomSize() {
+		return listRoom.size();
+	}
+	
+	public static void addTCPClientConnection(String key, TCPHandler tcpHandler) {
+		listConnection.put(key, new PairConnection(tcpHandler, null));
+	}
+	
+	public static void addUDPClientConnection(String key, InetAddress addr, int clientPort) {
+		listConnection.get(key).setUdpConnection(new UdpConnection(addr, clientPort));
+	}
+	
+	public static TCPHandler getTCPConnection(String key) {
+		return listConnection.get(key).getTcpHandler();
+	}
+	
+	public static UdpConnection getUDPConnection(String key) {
+		return listConnection.get(key).getUdpConnection();
+	}
+	
+	public static PairConnection getConnections(String key) {
 		return listConnection.get(key);
-	}
-	
-	public static int hasRoom(String name) {
-		for (int i = 0; i < listRoom.size(); ++i) {
-			if (listRoom.get(i).getRoomName().equals(name)) return i;
-		}
-		return -1;
-	}
-	
-	public static Room getRoom(int index) {
-		return listRoom.get(index);
 	}
 }

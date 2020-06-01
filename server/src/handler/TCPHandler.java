@@ -10,6 +10,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -20,9 +23,11 @@ import code.Message;
 import code.RequestCode;
 import code.ResponseCode;
 import code.StatusCode;
-import code.UpdateCode;
 import database.DatabaseHandler;
+import helpers.Element;
+import helpers.Game;
 import helpers.Room;
+import helpers.Room.Player;
 import server.TCPServer;
 
 public class TCPHandler extends Thread {
@@ -33,10 +38,13 @@ public class TCPHandler extends Thread {
 	
 	private boolean isRunning;
 	
+	private Room room;
+	
 	public TCPHandler(Socket socket) {
 		this.isRunning = true;
 		this.socket = socket;
-		conn = DatabaseHandler.getInstance().getConnection();
+		this.room = null;
+		this.conn = DatabaseHandler.getInstance().getConnection();
 		try {
 			br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			pr = new PrintStream(socket.getOutputStream());
@@ -51,18 +59,19 @@ public class TCPHandler extends Thread {
 			while (isRunning) {
 				String s_req = br.readLine();
 				System.out.println(s_req);
+				if (s_req == null) continue;
 				JSONObject request = (JSONObject) JSONValue.parse(s_req);
 				
 				long req_code = (long) request.get("req_code");
 				
 				// handle request and send response			
 				switch((int)req_code) {
-					case RequestCode.SIGNIN_REQ:
-						signInHandler(request);
+					case RequestCode.ENEMY_DIE_REQ:
+						enemyDeadHandler(request);
 						break;
-					
-					case RequestCode.SIGNUP_REQ:
-						signUpHanlder(request);
+						
+					case RequestCode.CHAT_REQ:
+						chatHandler(request);
 						break;
 						
 					case RequestCode.ROOM_CREATION_REQ:
@@ -72,24 +81,58 @@ public class TCPHandler extends Thread {
 					case RequestCode.JOIN_ROOM_REQ:
 						joinRoomHandler(request);
 						break;
+						
+					case RequestCode.PLAYER_DIE_REQ:
+						playerDeadHandler(request);
+						break;
+						
+					case RequestCode.PLAY_GAME_REQ:
+						playRoomHandler(request);
+						break;
+						
+					case RequestCode.READY_REQ:
+						break;
+						
+					case RequestCode.LEAVE_ROOM_REQ:
+						leaveRoomHandler(request);
+						break;
+						
+					case RequestCode.CLEAR_ROOM_REQ:
+						clearRoomHandler(request);
+						break;
+					
+					case RequestCode.SIGNIN_REQ:
+						signInHandler(request);
+						break;
+					
+					case RequestCode.SIGNUP_REQ:
+						signUpHanlder(request);
+						break;
+						
+					
 					
 					default: break;
 				}
 			}
 			
-		} catch (IOException | SQLException e) {
+		} catch (IOException | SQLException | InterruptedException e) {
 			System.out.println("Error: " + e.getMessage());
 			send(makeJSONDataString(ResponseCode.ERROR_RES, StatusCode.FAILED, ErrorCode.SERVER_FAILED, Message.SERVER_ERROR));
 		}
 	}
 	
+	/**
+	 * Home
+	 * 
+	 * sign in, sign up, room: create, join, ready, leave, clear, start, chat
+	 * */
 	private void signInHandler(JSONObject request) throws SQLException, IOException {
 		String username = (String) request.get("username");
 		String password = (String) request.get("password");
 		
 		int id = checkSignIn(username, password);
 		if (id != 0) {
-			TCPServer.addClientConnection(username, this);
+			TCPServer.addTCPClientConnection(username, this);
 			send(makeJSONDataString(ResponseCode.SIGNIN_RES, StatusCode.SUCCESS, "user_id",  id));
 		} else {
 			send(makeJSONDataString(ResponseCode.SIGNIN_RES, StatusCode.FAILED, ErrorCode.SIGNIN_FAILED, Message.ACCOUNT_NOT_EXISTS));
@@ -109,48 +152,60 @@ public class TCPHandler extends Thread {
 		}
 	}
 	
+	
 	private void roomCreationHandler(JSONObject request) {
 		String roomName = (String) request.get("room_name");
-		String roomMaster = (String) request.get("room_master");
+		String roomOwner = (String) request.get("room_owner");
 		String roomPass = (String) request.get("room_pass");
-		long roomSize = (long) request.get("size");
+		int roomSize = (int) (long) request.get("size");
+		String shipName = (String) request.get("ship");
 		
-		int pos = TCPServer.hasRoom(roomName);
-		if (pos == -1) {
-			Room newRoom = new Room(roomName, roomMaster, roomPass, (int)roomSize);
-			TCPServer.addNewRoom(newRoom);
-			send(makeJSONDataString(ResponseCode.ROOM_CREATION_RES, StatusCode.SUCCESS, ErrorCode.NONE, null));
+		Room room = TCPServer.hasRoom(roomName);
+		if (room == null) {
+			Integer roomId = genId();
+			while (TCPServer.checkRoomId(roomId)) {
+				roomId = genId();
+			}
+			Room newRoom = new Room(roomId, roomName, roomPass, roomSize);
+			newRoom.addMember(roomOwner, shipName, TCPServer.getConnections(roomOwner), true);
+			TCPServer.addNewRoom(roomId, newRoom);
+			send(makeJSONDataString(ResponseCode.ROOM_CREATION_RES, StatusCode.SUCCESS, "room", newRoom.roomJSONSimpleInfo()));
+			this.room = newRoom;
 		}
 		else {
 			send(makeJSONDataString(ResponseCode.ROOM_CREATION_RES, StatusCode.FAILED, ErrorCode.ROOM_CREATION_FAILED, Message.ROOM_EXISTS));
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void joinRoomHandler(JSONObject request) {
 		String roomName = (String) request.get("room_name");
 		String memberName = (String) request.get("member_name");
 		String roomPass = (String) request.get("room_pass");
+		String shipName = (String) request.get("ship");
 		
-		int pos = TCPServer.hasRoom(roomName);
-		if (pos != -1) {
-			Room room = TCPServer.getRoom(pos);
-			if (room.isFull()) {
-				send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_FULL));
-			}
-			else if (isExactRoomPassword(room.getRoomPassword(), roomPass)) {
-				room.addMember(memberName);
-				JSONArray teamArray = new JSONArray();
-				teamArray.addAll(room.getListMember());
-				send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.SUCCESS, "team", teamArray));
-				sendUpdateToRoomMember(room, memberName);
-			} 
-			else {
-				String response;
-				if (roomPass == null) response = makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.REQUIRE_ROOM_PASS);
-				else response = makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_PASS_INCORRECT);
+		Room room = TCPServer.hasRoom(roomName);
+		if (room != null) {
+			synchronized (room) {
+				if (room.isRunning()) send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_IS_RUNNING));
 				
-				send(response);
+				else if (room.isFull()) send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_FULL));
+				
+				else if (isExactRoomPassword(room.getRoomPassword(), roomPass)) {
+					
+						Player newPlayer = room.addMember(memberName, shipName, TCPServer.getConnections(memberName), false);
+	
+						send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.SUCCESS, "room", room.toJSONObject()));
+						String data = makeJSONDataString(ResponseCode.NEW_MEMBER_RES, StatusCode.NONE, "new_member", newPlayer.toJSONObject());
+						this.room = room;
+						sendToRoomMember(memberName, data);
+				}
+				else {
+					String response;
+					if (roomPass == null) response = makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.REQUIRE_ROOM_PASS);
+					else response = makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_PASS_INCORRECT);
+					
+					send(response);
+				}
 			}
 		} 
 		else {
@@ -158,15 +213,204 @@ public class TCPHandler extends Thread {
 		}
 	}
 	
-	private void sendUpdateToRoomMember(Room room, String newMemberName) {
-		String update = makeJSONDataString(UpdateCode.NEW_MEMBER, StatusCode.NONE, "new_member", newMemberName);
-		for (String memberName: room.getListMember()) {
-			if (!memberName.equals(newMemberName)) {
-				TCPServer.getConnection(memberName).send(update);
+	private void chatHandler(JSONObject request) {
+		String sender = (String) request.get("sender");
+		JSONArray data = (JSONArray) request.get("data");
+		synchronized (room) {
+			sendToRoomMember(sender, makeJSONDataString(ResponseCode.CHAT_RES, StatusCode.NONE, "data", data));
+		}
+	}
+	
+	private void leaveRoomHandler(JSONObject request) {
+		int playerId = (int) (long) request.get("player_id");
+		
+		synchronized (room) {
+			if (room.isRunning()) {
+				send(makeJSONDataString(ResponseCode.LEAVE_ROOM_RES, StatusCode.FAILED, ErrorCode.LEAVE_ROOM_FAILED, Message.ROOM_IS_RUNNING));
+				return;
+			}
+			
+			Player p = room.removePlayer(playerId);
+			send(makeJSONDataString(ResponseCode.LEAVE_ROOM_RES, StatusCode.SUCCESS, ErrorCode.NONE, null));
+			sendToRoomMember(null, makeJSONDataString(ResponseCode.LEAVE_ROOM_NOTIFY_RES, StatusCode.NONE, "player_id", playerId));
+			
+			if (room.isEmpty()) TCPServer.deleteRoom(room.getRoomId());
+			else if (p.isOwner()) {
+				sendToRoomMember(null, makeJSONDataString(ResponseCode.SET_NEW_OWNER_RES, StatusCode.NONE, "owner_id", room.getRoomOwner().getPlayerId()));
+			}
+		}
+		this.room = null;
+	}
+	
+	private void clearRoomHandler(JSONObject request) {
+		synchronized (room) {
+			if (room.isRunning()) {
+				send(makeJSONDataString(ResponseCode.CLEAR_ROOM_RES, StatusCode.FAILED, ErrorCode.CLEAR_ROOM_FAILED, Message.ROOM_IS_RUNNING));
+				return;
+			}
+			sendToRoomMember(null, makeJSONDataString(ResponseCode.CLEAR_ROOM_RES, StatusCode.SUCCESS, null, null));
+			TCPServer.deleteRoom(room.getRoomId());
+			List<Player> players = room.getListMember();
+			for (Player p: players) {
+				p.getConnections().getTcpHandler().room = null;
 			}
 		}
 	}
+	
+	private void sendToRoomMember(String sender, String data) {
+		if (sender == null) {
+			for (Player p: room.getListMember()) {
+				p.getConnections().getTcpHandler().send(data);
+			}
+		} else {
+			for (Player p: room.getListMember()) {
+				if (!p.getName().equals(sender)) {
+					p.getConnections().getTcpHandler().send(data);
+				}
+			}
+		}
+	}
+	/*********************** End Home ***********************/
+	
+	
+	/**
+	 * Room Handler
+	 * 
+	 * leave, delete, start, chat room
+	 * */
+	private void playRoomHandler(JSONObject request) throws InterruptedException {		
+		synchronized (room) {
+			establishUdpConnections(room);
+			room.setRunning();
+			
+			String data = makeJSONDataString(ResponseCode.PLAY_GAME_RES, StatusCode.SUCCESS, ErrorCode.NONE, null);
+			sendToRoomMember(null, data);
+			
+			Thread.sleep(500);
+			sendToRoomMember(null, "");
+			sendToRoomMember(null, makeJSONDataString(ResponseCode.NEW_LEVEL_RES, StatusCode.NONE, "level", room.getGame().getLevel()));
+			Thread.sleep(5000);
+			sendNextBatch(room.getGame());
+		}
+	}
+	
+	private void sendNextBatch(Game game) {
+		JSONArray elementsBatch = game.nextBatch();
+		String firstData = makeJSONDataString(ResponseCode.ELEMENTS_BATCH_RES, StatusCode.NONE, "data", elementsBatch);
+		sendToRoomMember(null, firstData);
+	}
+	
+	private void establishUdpConnections(Room room) {
+		List<Player> players = room.getListMember();
+		
+		String data = makeJSONDataString(ResponseCode.ESTABLISH_UDP_CONNECTION_RES, StatusCode.NONE, null, null);
+		
+		int cnt = 0;
+		while (cnt < players.size()) {
+			for (Player p: players) {
+				if (p.checkUDPConnection()) {
+					p.getConnections().getTcpHandler().send(data);
+				} else ++cnt;
+			}
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	/*********************** End RoomHandler ***********************/
+	
+	
+	/**
+	 * Main: Game
+	 * 
+	 * kill, dead, generate enemy, game level, game over, game pass v.v...
+	 * @throws InterruptedException 
+	 *  
+	 * */
+	private void playerDeadHandler(JSONObject request) throws InterruptedException {
+		int playerId = (int) (long) request.get("player_id");
+		Game game = room.getGame();
+		sendToRoomMember(null, makeJSONDataString(ResponseCode.PLAYER_DIE_RES, StatusCode.SUCCESS, "player_id", playerId));
+		if (game == null || !room.isRunning()) {
+			return;
+		}
+		game.killPlayer();
+		synchronized (game) {
+			if (game.checkEndGame() == -1) {
+				endGameHandler(game, false);
+			}
+		}
+	}
+	
+	private void enemyDeadHandler(JSONObject request) throws InterruptedException {
+		int enemyId = (int) (long) request.get("enemy_id");
+		int killerId = (int) (long) request.get("killer_id");
+		
+		Game game = room.getGame();
+		if (game == null || !room.isRunning()) return;
+		Element e = game.getElement(enemyId);
+		synchronized (e) {
+			if (!e.isDead()) {
+				game.killEnemy(e);
+				if (killerId != -1) {
+					Player you = room.getMember(killerId);
+					you.addScore(e.getWorth());
+					send(makeJSONDataString(ResponseCode.NEW_SCORE_RES, StatusCode.NONE, "score", you.getScore()));
+				}
+				
+				synchronized (game) {
+					if (game.checkEndGame() == 1) {
+						endGameHandler(game, true);
+					} 
+					else if (game.passLevel()) {
+						game.nextLevel();
+						sendToRoomMember(null, makeJSONDataString(ResponseCode.NEW_LEVEL_RES, StatusCode.NONE, "level", room.getGame().getLevel()));
+						Thread.sleep(8000);
+						sendNextBatch(game);
+					}
+					else if (game.checkBatch()) {
+						sendNextBatch(game);
+					}
+				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void endGameHandler(Game game, boolean isWin) throws InterruptedException {
+		List<Player> players = room.getListMember();
+		players.sort(new Comparator<Player>() {
 
+			@Override
+			public int compare(Player p1, Player p2) {
+				return p1.getScore() < p2.getScore() ? 1 : -1;
+			}
+		});
+		
+		JSONArray gameRes = new JSONArray();
+		for (Player p: players) {
+			gameRes.add(p.getGameResult());
+		}
+		
+		if (isWin) sendToRoomMember(null, makeJSONDataString(ResponseCode.WIN_GAME_RES, StatusCode.NONE, "game_result", gameRes));
+		else sendToRoomMember(null, makeJSONDataString(ResponseCode.LOST_GAME_RES, StatusCode.NONE, "game_result", gameRes));
+		Thread.sleep(500);
+		sendToRoomMember(null, "");
+		room.reset();
+	}
+	/*********************** End Game ***********************/
+	
+	/**
+	 * Helper
+	 * 
+	 * database(insert, update, delete), check v.v...
+	 * */
+	private void send(String data) {
+		pr.println(data);
+	}
+	
 	private boolean isExactRoomPassword(String realRoomPass, String roomPass) {
 		if (realRoomPass == null || realRoomPass.isEmpty()) return true;
 		return realRoomPass.equals(roomPass);
@@ -190,13 +434,9 @@ public class TCPHandler extends Thread {
 		
 		response.put("tcp_code", tcpCode);
 		if (status_code != StatusCode.NONE) response.put("status", status_code);
-		response.put(dataName, dataValue);
+		if (dataName != null && dataValue != null) response.put(dataName, dataValue);
 		
 		return response.toJSONString();
-	}
-	
-	private void send(String data) {
-		pr.println(data);
 	}
 	
 	private boolean checkUserExists(String username) throws SQLException {
@@ -234,6 +474,12 @@ public class TCPHandler extends Thread {
 		ps.setDate(3, date);
 
 		return ps.executeUpdate() != 0;
+	}
+	
+	private Integer genId() {
+		Random random = new Random();
+		
+		return random.nextInt(Integer.MAX_VALUE);
 	}
 	
 	private void closeHandler() {
