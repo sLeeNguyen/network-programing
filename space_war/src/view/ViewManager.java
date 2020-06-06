@@ -366,6 +366,7 @@ public class ViewManager {
             final ShipPicker sp = new ShipPicker(ship);
             shipPickers.add(sp);
             box.getChildren().add(sp);
+            if (sp.getSHIP().name().equals(yourShip.name())) sp.setCircleChoosen(true);
             
             sp.setOnMouseClicked(new EventHandler<MouseEvent>() {
                
