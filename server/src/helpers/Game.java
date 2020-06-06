@@ -5,7 +5,7 @@ import java.util.Random;
 import org.json.simple.JSONArray;
 
 public class Game {
-	public static final int MAX_LEVEL = 1;
+	public static final int MAX_LEVEL = 4;
 	
 	private final int COLOR_SIZE = 4; // black, blue, green, red
 	private final int NUM_KIND = 5;
@@ -28,7 +28,7 @@ public class Game {
 		this.random = new Random();
 		this.level = 1;
 		this.batch = 0;
-		this.numInBatch = 10;
+		this.numInBatch = 5;
 		this.numOfElements = NUM_BASE;
 		this.numOfDead = 0;
 		generateElements();
@@ -38,11 +38,20 @@ public class Game {
 		elements = new Element[numOfElements];
 		int maxSpeed = SPEED_BASE + level;
 		int worth = 5 + level*5;
-		
+		int skill = getSkill();
 		for (int i = 0; i < numOfElements; ++i) {
-			// Element(int id, double layoutX, double layoutY, int speed, int color, int kind, int worth)
-			elements[i] = new Element(i, genInt(40, 1160), -genInt(100, 3000), genInt(SPEED_BASE, maxSpeed), genInt(0, COLOR_SIZE), genInt(0, NUM_KIND), worth);
+			// Element(int id, double layoutX, double layoutY, int speed, int color, int kind, int worth, int skill, int blood)
+			elements[i] = new Element(i, genInt(40, 1100), -genInt(100, 3000), genInt(SPEED_BASE, maxSpeed), genInt(0, COLOR_SIZE), genInt(0, NUM_KIND),
+					worth, skill, (level + 1)>>1);
 		}
+	}
+	
+	private int getSkill() {
+		int skill = 0;
+		if (level > 2) skill |= Element.SHOOT;
+		if (level > 4) skill |= Element.SHIELD;
+		
+		return skill;
 	}
 	
 	public void killEnemy(Element e) {
