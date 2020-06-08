@@ -138,7 +138,7 @@ public class Client {
 			long id = (long) response.get("user_id");
 			return (int) id;
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			closeConnection();
 			e.printStackTrace();
 		}
@@ -229,10 +229,15 @@ public class Client {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void sendReadyRequest(int playerId) {
+	public static void sendReadyRequest(int playerId, int status) {
+		// 0: unready, 1: ready
 		JSONObject request = new JSONObject();
 		request.put("req_code", 25);
+		JSONArray dataArr = new JSONArray();
+		dataArr.add(playerId);
+		dataArr.add(status);
 		request.put("player_id", playerId);
+		request.put("data", dataArr);
 		
 		pr.println(request.toJSONString());
 	}
@@ -321,7 +326,7 @@ public class Client {
 			try {
 				tcpSocketClient.close();
 				br.close(); pr.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				//pass
 			}
 	}
