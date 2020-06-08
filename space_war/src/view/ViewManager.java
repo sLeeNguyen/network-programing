@@ -84,6 +84,7 @@ public class ViewManager {
     private SpaceWarButton startBtn;
     private SpaceWarButton clearBtn;    
     private SpaceWarButton readyBtn;
+    private SpaceWarButton unreadyBtn;
     private SpaceWarButton leaveBtn;
     
     List<SpaceWarButton> menuButtons;
@@ -460,7 +461,10 @@ public class ViewManager {
 				String roomPass = roomInfor.getPassword();
 				int size = roomInfor.getRoomSize();
 				
-				if (roomName == null || roomName.isEmpty()) CheckAndAlert.alertErrorMessage("Vui lòng nhập tên phòng");
+				if (roomName == null || roomName.isEmpty()) {
+					CheckAndAlert.alertErrorMessage("Vui lòng nhập tên phòng");
+					return;
+				}
 
 				Client.sendRoomCreationRequest(roomName, user.getName(), size, roomPass, yourShip.name());
 				
@@ -493,7 +497,10 @@ public class ViewManager {
 				String roomName = joinRoomInfor.getRoomName();
 				String roomPass = joinRoomInfor.getPassword();
 				
-				if (roomName == null || roomName.isEmpty()) CheckAndAlert.alertErrorMessage("Vui lòng nhập tên phòng");
+				if (roomName == null || roomName.isEmpty()) {
+					CheckAndAlert.alertErrorMessage("Vui lòng nhập tên phòng");
+					return;
+				}
 				
 				Client.sendJoinRoomRequest(roomName, roomPass, user.getName(), yourShip.name());
 			}
@@ -537,6 +544,11 @@ public class ViewManager {
     		this.ship = ship;
     		this.name = name;
     		
+    		ImageView readyImg = new ImageView(Resource.READY_PATH);
+    		box.getChildren().add(readyImg);
+    		box.setAlignment(Pos.CENTER);
+    		box.setVisible(false);
+    		
     		Label nameLB = new Label(this.name);
     		nameLB.setTextFill(Color.WHITESMOKE);
     		try {
@@ -549,9 +561,11 @@ public class ViewManager {
     	}
     	
     	public void ready() {
+    		box.setVisible(true);
     	}
     	
     	public void unReady() {
+    		box.setVisible(false);
     	}
     	
     	public Ship getShip() {
@@ -565,9 +579,10 @@ public class ViewManager {
     	public void setOwner(boolean isOwner) {
     		this.owner = isOwner;
     		if (owner == true) {
+    			box.getChildren().clear();
     			ImageView ownerImg = new ImageView(Resource.OWNER_PATH);
     			box.getChildren().add(ownerImg);
-    			box.setAlignment(Pos.CENTER);
+    			box.setVisible(true);
     		}
     	}
     	
@@ -596,10 +611,11 @@ public class ViewManager {
     	teamView.getChildren().addAll(players);
     	
     	double baseX = 550D;
-    	startBtn = new SpaceWarButton("START"); startBtn.setLayoutX(baseX + 250*2); startBtn.setLayoutY(650);
     	leaveBtn = new SpaceWarButton("LEAVE"); leaveBtn.setLayoutX(baseX); leaveBtn.setLayoutY(650);
     	clearBtn = new SpaceWarButton("CLEAR"); clearBtn.setLayoutX(baseX + 250); clearBtn.setLayoutY(650);
+    	startBtn = new SpaceWarButton("START"); startBtn.setLayoutX(baseX + 250*2); startBtn.setLayoutY(650);
     	readyBtn = new SpaceWarButton("READY"); readyBtn.setLayoutX(baseX + 250*2); readyBtn.setLayoutY(650); 
+    	unreadyBtn = new SpaceWarButton("UNREADY"); unreadyBtn.setLayoutX(baseX + 250*2); unreadyBtn.setLayoutY(650); unreadyBtn.setVisible(false);
     	
     	startBtn.setVisible(you.isOwner());
     	clearBtn.setVisible(you.isOwner());
@@ -611,18 +627,34 @@ public class ViewManager {
     		}
     	});
     	
-    	startBtn.setOnMouseClicked((e) -> {
+    	startBtn.setOnMouseClicked(e -> {
     		Client.sendPlayGameRequest();        		
     	});
     	
-    	clearBtn.setOnMouseClicked((e) -> {
+    	clearBtn.setOnMouseClicked(e -> {
     		if (CheckAndAlert.alertConfirmMessage("Are you sure?")) {
     			Client.sendClearRoomRequest();
     		}
     	});
     	
+    	readyBtn.setOnMouseClicked(e -> {
+    		you.ready();
+    		readyBtn.setVisible(false);
+    		unreadyBtn.setVisible(true);
+    		leaveBtn.setDisable(true);
+    		Client.sendReadyRequest(you.getShip().getID(), 1);
+    	});
     	
-    	mainPane.getChildren().addAll(yourTeam, teamView, leaveBtn, clearBtn, startBtn, readyBtn);
+    	unreadyBtn.setOnMouseClicked(e -> {
+    		you.unReady();
+    		unreadyBtn.setVisible(false);
+    		readyBtn.setVisible(true);
+    		leaveBtn.setDisable(false);
+    		Client.sendReadyRequest(you.getShip().getID(), 0);
+    	});
+    	
+    	
+    	mainPane.getChildren().addAll(yourTeam, teamView, leaveBtn, clearBtn, startBtn, readyBtn, unreadyBtn);
     	/************************************************************************************/
     	    	
     	roomInfor = new VBox();
@@ -781,6 +813,10 @@ public class ViewManager {
     				case ServerCode.NEW_MEMBER_RES:
     					newMemberHandler(json_data);
     					break;
+    					
+    				case ServerCode.READY_RES:
+    					readyHandler(json_data);
+    					break;
     				
     				case ServerCode.PLAY_GAME_RES:
     					gamePlayHandler(json_data);
@@ -801,6 +837,19 @@ public class ViewManager {
     		startBtn.setVisible(true);
         	clearBtn.setVisible(true);
         	readyBtn.setVisible(false);
+    	}
+    }
+    
+    private void readyHandler(JSONObject json_data) {
+    	JSONArray dataArr = (JSONArray) json_data.get("data");
+    	int playerId = (int) (long) dataArr.get(0);
+    	int status = (int) (long) dataArr.get(1);
+    	
+    	if (status == 0) {
+    		playersView[playerId].unReady();
+//    		startBtn.setDisable(true);
+    	} else {
+    		playersView[playerId].ready();
     	}
     }
     
@@ -825,6 +874,8 @@ public class ViewManager {
     	String playerName = playersView[playerId].getName();
     	playersView[playerId].reset();
     	chatFrame.getChildren().add(createMessageView(null, String.format("%s has left the room", playerName)));
+    	Label size = (Label) roomInfor.getChildren().get(1);
+		size.setText("Size: " + --curr_size + "/" + size.getText().split("/")[1]);
     }
     
     private void leaveRoomHandler(JSONObject json_data) {
@@ -855,18 +906,23 @@ public class ViewManager {
     }
     
     private void gamePlayHandler(JSONObject response) {
-    	long status = (long) response.get("status");
+    	int status = (int) (long) response.get("status");
 
     	if (status != 0) {
     		tcpHandler.stopThread();
     		game = new GamePlay();
     		game.createNewGame(this, playersView, this.roomId);
+    	} else if (status == 0) {
+    		int errorCode = (int) (long) response.get("error_code");
+    		String message = (String) response.get("message");
+    		CheckAndAlert.alertErrorMessage(errorCode, message);
     	}
     }
     
 	private void newMemberHandler(JSONObject requireUpdate) {
 		JSONObject newMember = (JSONObject) requireUpdate.get("new_member");
 		if (newMember != null) {
+//			startBtn.setDisable(true);
 			int playerId = (int) (long) newMember.get("id");
 			SHIP shipE = SHIP.valueOf((String) newMember.get("ship"));
 			playersView[playerId].setShipView(new Ship(shipE, EType.ANOTHER_PLAYER, 12, 100, 75, playerId), (String)newMember.get("name"));
@@ -902,13 +958,15 @@ public class ViewManager {
 				int playerId = (int) (long) player.get("id");
 				String playerName = (String) player.get("name");
 				SHIP shipE = SHIP.valueOf((String) player.get("ship"));
-				
+				int readied = (int) (long) player.get("readied");
+ 				
 				if (playerName.equals(user.getName())) {
 					playersView[playerId].setShipView(new Ship(shipE, EType.YOU, 12, 100, 75, playerId), playerName);
 					you = playersView[playerId];
 				}
 				else {
 					playersView[playerId].setShipView(new Ship(shipE, EType.ANOTHER_PLAYER, 12, 100, 75, playerId), playerName);
+					if (status == 1) playersView[playerId].ready();
 				}
 			}
 			playersView[ownerId].setOwner(true);

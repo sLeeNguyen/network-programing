@@ -48,6 +48,7 @@ import model.SpaceWarButton;
 import model.element.Bullet;
 import model.element.EType;
 import model.element.Element;
+import model.element.Shield;
 import model.element.Ship;
 import view.ViewManager.PlayerInfor;
 
@@ -79,10 +80,6 @@ public class GamePlay {
     
     private TCPClient tcpHandler;
     private UDPClient udpHandler;
-    
-//    private Meteor[] brownMeteors;
-//    private Meteor[] greyMeteors;
-//    private List<Ship> enemies;
 
     public GamePlay() {
         initializeStage();
@@ -92,6 +89,7 @@ public class GamePlay {
 		} catch (FileNotFoundException e) {
 			//pass
 		}
+        
     }
 
     private void createKeyListeners() {
@@ -191,7 +189,9 @@ public class GamePlay {
     			Ship shipClone = new Ship(ship.getShipE(), ship.getType(), ship.getRadius(), ship.getWidth(), ship.getHeight(), ship.getID());
         		if (shipClone.getType() == EType.YOU) {
         			yourShip = shipClone;
-        		}
+        			yourShip.setBulletType(EType.YOUR_BULLET);
+        		} else shipClone.setBulletType(EType.PLAYER_BULLET);
+        		
         		ships[shipClone.getID()] = shipClone;
         		shipClone.setLayoutX(200 + 330*i);
         		shipClone.setLayoutY(GAME_HEIGHT - shipClone.getHeight() - 20);
@@ -213,18 +213,11 @@ public class GamePlay {
     				break;
     			
 	    		case EType.ENEMY:
-	    			Ship enemy = (Ship) e;
-	    			enemy.moveDown();
-	    			if (checkCollide(yourShip, enemy)) {
-	    				enemy.dead(true);
-	    				Client.sendPlayerDeadRequest(yourShip.getID());
-	    			} else {
-	    				if (enemy.getLayoutY() > GAME_HEIGHT) {
-		    				Client.sendEnemyDeadRequest(enemy.getID(), -1);
-		    				enemy.dead(true);
-		    			}
-	    			}
+	    			moveEnemyShip((Ship) e);
+	    			break;
 	    			
+	    		case EType.ENEMY_BULLET:
+	    			moveEnemyBullet((Bullet) e);
 	    			break;
     		}
     	});
@@ -237,15 +230,85 @@ public class GamePlay {
     	});
     }
     
+    private void moveEnemyShip(Ship enemy) {
+    	enemy.moveDown();
+		if (enemy.checkShoot()) {
+			gamePane.getChildren().add(enemy.shoot());
+		}
+		if (enemy.getLayoutY() > GAME_HEIGHT) {
+			Client.sendEnemyDeadRequest(enemy.getID(), -1);
+			enemy.dead(true);
+			return;
+		}
+		for (Ship ship: ships) {
+			if (ship != null) {
+				if (checkCollide(ship, enemy)) {
+    				enemy.dead(true);
+    				enemy.deleteShield();
+    				if (ship.getType() == EType.YOU) Client.sendEnemyDeadRequest(enemy.getID(), yourShip.getID());
+    				Shield shield = ship.useShield();
+    				if (shield != null) {
+    					showShield(ship, shield);
+    				} else {
+	    				if (ship.getType() == EType.YOU) Client.sendPlayerDeadRequest(yourShip.getID());
+    				}
+    			}
+			}
+		}
+    }
+    
+    private void showShield(Ship ship, Shield shield) {
+    	gamePane.getChildren().add(shield);
+    	FadeTransition fadeIn = new FadeTransition(Duration.millis(300), shield);
+    	fadeIn.setFromValue(0);
+    	fadeIn.setToValue(1);
+    	fadeIn.play();
+    	fadeIn.setOnFinished(e -> {
+    		FadeTransition fadeOut = new FadeTransition(Duration.millis(500), shield);
+    		fadeOut.setDelay(Duration.millis(4));
+    		fadeOut.setFromValue(1);
+    		fadeOut.setToValue(0);
+    		fadeOut.play();
+    		fadeOut.setOnFinished(n -> ship.deleteShield());
+    	});
+    }
+    
+    private void moveEnemyBullet(Bullet b) {
+    	b.moveDown(10);
+    	if (b.getLayoutY() > GAME_HEIGHT) b.dead(true);
+    	for (Ship player: ships) {
+    		if (player != null) {
+	    		if (checkCollide(b, player)) {
+	    			b.dead(true);
+	    			Shield playerShield = player.useShield();
+	    			if (playerShield != null) {
+	    				showShield(player, playerShield);
+	    			}
+	    			else if (player.decreaseBlood() <= 0 && player.getType() == EType.YOU) {
+	    				Client.sendPlayerDeadRequest(yourShip.getID());
+	    			}
+	    		}
+    		}
+    	}
+    }
+    
     private void movePlayerBullet(Bullet b) {
 		b.moveUp(10);
 		
 		if (b.getLayoutY() < -10) b.dead(true);
-		elements().stream().filter(el -> el.getType() == EType.ENEMY).forEach(enemy -> {
+		elements().stream().filter(el -> el.getType() == EType.ENEMY).forEach(e -> {
+			Ship enemy = (Ship) e;
 			if (checkCollide(b, enemy)) {
 				b.dead(true);
-				enemy.dead(true);
-				if (b.getType() == EType.YOUR_BULLET) Client.sendEnemyDeadRequest(enemy.getID(), yourShip.getID());
+				Shield enemyShield = enemy.useShield();
+				if (enemyShield != null) {
+					showShield(enemy, enemyShield);
+				}
+				else if (enemy.decreaseBlood() <= 0) {
+					enemy.dead(true);
+					enemy.deleteShield();
+					if (b.getType() == EType.YOUR_BULLET) Client.sendEnemyDeadRequest(enemy.getID(), yourShip.getID());	
+				}
 			}
 		});
     }
@@ -345,9 +408,15 @@ public class GamePlay {
     	pane.setLayoutY(GAME_HEIGHT/2 - 350);
     	
     	ImageView img;
-    	if (isWin) img = new ImageView(Resource.WIN_GAME_PATH);
-    	else img = new ImageView(Resource.LOST_GAME_PATH);
-    	img.setLayoutX(410); img.setLayoutY(20);
+    	if (isWin) {
+    		img = new ImageView(Resource.WIN_GAME_PATH);
+    		img.setLayoutX(410); img.setLayoutY(20);
+    	}
+    	else {
+    		img = new ImageView(Resource.LOST_GAME_PATH);
+    		img.setLayoutX(380); img.setLayoutY(20);
+		}
+    	
     	
     	HBox headBar = new HBox(60);
     	headBar.setPrefSize(790, 50);
@@ -378,7 +447,6 @@ public class GamePlay {
     	SpaceWarButton okBtn = new SpaceWarButton("OK");
     	okBtn.setLayoutX(750); okBtn.setLayoutY(600);
     	okBtn.setOnMouseClicked(e -> {
-//    		gamePane.getChildren().clear();
     		gameStage.close();
     		manager.createTCPHandler();
     		manager.getMainStage().show();
@@ -438,12 +506,12 @@ public class GamePlay {
     private void createTCPHandler() {
     	tcpHandler = new TCPClient(data ->  {
     		Platform.runLater(() -> {
-    			System.out.println(data);
+//    			System.out.println(data);
     			JSONObject json_data = (JSONObject) JSONValue.parse(data);
         		
-        		long tcp_code = (long) json_data.get("tcp_code");
+        		int tcp_code = (int) (long) json_data.get("tcp_code");
         		
-        		switch ((int)tcp_code) {
+        		switch (tcp_code) {
         			case ServerCode.ELEMENTS_BATCH_RES:
         				setGameElements(json_data);
         				break;
@@ -486,7 +554,7 @@ public class GamePlay {
     	JSONArray gameRes = (JSONArray) json_data.get("game_result");
     	
     	ImageView lostImg = new ImageView(Resource.LOST_GAME_PATH);
-    	lostImg.setLayoutX(GAME_WIDTH/2 - 110);
+    	lostImg.setLayoutX(GAME_WIDTH/2 - 140);
     	lostImg.setLayoutY(GAME_HEIGHT/2 - 60);
     	lostImg.setScaleX(0);
     	lostImg.setScaleY(0);
@@ -577,9 +645,9 @@ public class GamePlay {
     	JSONArray eArr = (JSONArray) json_data.get("data");
     	
     	/**
-    	 * eArr - consist of elements containing information about the elements 
-    	 * eArr[i] - [<id>:long, <layoutX>:double, <layoutY>:double, <speed>:long, <color position>:long, <kind position>:long]
-    	 * 
+    	 * eArr - containing information about each elements 
+    	 * eArr[i] - [<id>:long, <layoutX>:double, <layoutY>:double, <speed>:long, <color position>:long, <kind position>:long,
+    	 * 				 <skill>:long, <bulletDelay>:long, <blood>:long]
     	 * */
     	for (int i = 0; i < eArr.size(); ++i) {
     		JSONArray e = (JSONArray) eArr.get(i);
@@ -590,8 +658,14 @@ public class GamePlay {
     		int speed = (int) (long) 	e.get(3);
     		int color = (int) (long)	e.get(4);
     		int kind  = (int) (long)	e.get(5);
+    		int skill = (int) (long)	e.get(6);
+    		int delayY = (int) (long) 	e.get(7);
+    		int blood = (int) (long) 	e.get(8);
     		
-    		Ship enemy = new Ship(Resource.ENEMY_PATH[color][kind], EType.ENEMY, layoutX, layoutY, Resource.ENEMY_RADIUS, Resource.ENEMY_WIDTH, Resource.ENEMY_HEIGHT, id, speed);
+    		Ship enemy = new Ship(Resource.ENEMY_PATH[color][kind], EType.ENEMY, layoutX, layoutY, 
+    				Resource.ENEMY_RADIUS, Resource.ENEMY_WIDTH, Resource.ENEMY_HEIGHT, id, speed, skill, blood);
+    		enemy.setBulletType(EType.ENEMY_BULLET);
+    		enemy.setBulletDelay(delayY);
     		gamePane.getChildren().add(enemy);
     	}
     	

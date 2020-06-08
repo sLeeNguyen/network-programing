@@ -13,6 +13,13 @@ public class Element extends ImageView {
 	private int id;
 	private boolean dead = false;
 	
+	public Element(String url) {
+		super(url);
+		this.WIDTH = 0;
+		this.HEIGHT = 0;
+		this.ELEMENT_RADIUS = 0;
+	}
+	
 	public Element(String url, double radius, double width, double height) {
 		super(url);
 		this.type = EType.NONE;

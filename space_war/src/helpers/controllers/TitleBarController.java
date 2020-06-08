@@ -27,6 +27,7 @@ public class TitleBarController implements Initializable {
     void onCancel(MouseEvent event) {
     	if (CheckAndAlert.alertConfirmMessage("Bạn có chắc chắn muốn thoát?")) {
     		Platform.exit();
+    		System.exit(0);
     	}
      }
 
