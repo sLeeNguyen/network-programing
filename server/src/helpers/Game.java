@@ -10,7 +10,7 @@ public class Game {
 	private final int COLOR_SIZE = 4; // black, blue, green, red
 	private final int NUM_KIND = 5;
 	private final int NUM_BASE = 20;
-	private final int MULTI_BASE = 20;
+	private final int MULTI_BASE = 10;
 	private final int SPEED_BASE = 3;
 	
 	private Random random;
@@ -28,7 +28,7 @@ public class Game {
 		this.random = new Random();
 		this.level = 1;
 		this.batch = 0;
-		this.numInBatch = 5;
+		this.numInBatch = 10;
 		this.numOfElements = NUM_BASE;
 		this.numOfDead = 0;
 		generateElements();
@@ -36,20 +36,22 @@ public class Game {
 	
 	public void generateElements() {
 		elements = new Element[numOfElements];
-		int maxSpeed = SPEED_BASE + level;
+		int boundSpeed = level + 2;
 		int worth = 5 + level*5;
-		int skill = getSkill();
+		
 		for (int i = 0; i < numOfElements; ++i) {
 			// Element(int id, double layoutX, double layoutY, int speed, int color, int kind, int worth, int skill, int blood)
-			elements[i] = new Element(i, genInt(40, 1100), -genInt(100, 3000), genInt(SPEED_BASE, maxSpeed), genInt(0, COLOR_SIZE), genInt(0, NUM_KIND),
+			int speed = genInt(SPEED_BASE, boundSpeed);
+			int skill = getSkill(speed);
+			elements[i] = new Element(i, genInt(40, 1100), -genInt(100, 2000), speed , genInt(0, COLOR_SIZE), genInt(0, NUM_KIND),
 					worth, skill, (level + 1)>>1);
 		}
 	}
 	
-	private int getSkill() {
+	private int getSkill(int speed) {
 		int skill = 0;
-		if (level > 2) skill |= Element.SHOOT;
-		if (level > 4) skill |= Element.SHIELD;
+		if (level > 2 && speed < 5) skill |= Element.SHOOT;
+		if (level > 3) skill |= Element.SHIELD;
 		
 		return skill;
 	}
@@ -88,7 +90,7 @@ public class Game {
 		level++;
 		batch = 0;
 		numOfDead = 0;
-		numOfElements = NUM_BASE + level*MULTI_BASE;
+		numOfElements = NUM_BASE ;
 		generateElements();
 	}
 	

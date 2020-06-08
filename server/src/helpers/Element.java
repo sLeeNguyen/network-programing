@@ -1,11 +1,14 @@
 package helpers;
 
+import java.util.Random;
+
 import org.json.simple.JSONArray;
 
 public class Element {
 	public static final int SHOOT = 1<<0;
 	public static final int SHIELD = 1<<1;
 	
+	private Random random;
 	private int id;
 	private double layoutX;
 	private double layoutY;
@@ -13,11 +16,13 @@ public class Element {
 	private int color;
 	private int kind;
 	private int worth;
-	private int skill;
+	private int skills;
 	private int blood;
+	private int bulletDelay;
 	private boolean isDead;
 	
 	public Element(int id, double layoutX, double layoutY, int speed, int color, int kind, int worth, int skill, int blood) {
+		random = new Random();
 		this.id = id;
 		this.layoutX = layoutX;
 		this.layoutY = layoutY;
@@ -25,12 +30,11 @@ public class Element {
 		this.color = color;
 		this.kind = kind;
 		this.worth = worth;
-		this.skill = skill;
+		this.skills = skill;
 		this.blood = blood;
 		this.isDead = false;
+		if ((skills & SHOOT) != 0) bulletDelay = 230 + random.nextInt(50);
 	}
-	
-	
 	
 	public boolean isDead() {
 		return isDead;
@@ -53,9 +57,10 @@ public class Element {
 		obj.add(speed);
 		obj.add(color);
 		obj.add(kind);
-		obj.add(skill);
+		obj.add(skills);
+		obj.add(bulletDelay);
 		obj.add(blood);
-		
+
 		return obj;
 	}
 }

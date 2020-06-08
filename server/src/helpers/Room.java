@@ -31,19 +31,21 @@ public class Room {
 	public class Player {
 		private String name;
 		private String shipName;
-		private boolean isOwner;
 		private PairConnection connections;
 		private int id;
+		private boolean readied;
+		private boolean isOwner;
 		
 		private int score;
 		private int numOfEnemiesKilled;
 		
-		Player(String name, String shipName, boolean isOwner, PairConnection connections, int id) {
+		Player(String name, String shipName, PairConnection connections, int id) {
 			this.name = name;
 			this.shipName = shipName;
-			this.isOwner = isOwner;
 			this.connections = connections;
 			this.id = id;
+			this.readied = false;
+			this.isOwner = false;
 		}
 		
 		public String getName() {
@@ -60,6 +62,15 @@ public class Room {
 		
 		public void setOwner() {
 			this.isOwner = true;
+			this.readied = true;
+		}
+		
+		public void ready(boolean readied) {
+			this.readied = readied;
+		}
+		
+		public boolean getReady() {
+			return readied;
 		}
 		
 		public PairConnection getConnections() {
@@ -95,6 +106,7 @@ public class Room {
 			playerJSON.put("name", name);
 			playerJSON.put("id", id);
 			playerJSON.put("ship", shipName);
+			playerJSON.put("readied", readied ? 1 : 0);
 			
 			return playerJSON;
 		}
@@ -152,6 +164,15 @@ public class Room {
 		return this.isRunning;
 	}
 	
+	public boolean checkReady() {
+		for (Player p: getListMember()) {
+			if (p.getReady()) continue;
+			return false;
+		}
+		
+		return true;
+	}
+	
 	public void reset() {
 		isRunning = false;
 		game = null;
@@ -163,7 +184,8 @@ public class Room {
 	synchronized public Player addMember(String name, String shipName, PairConnection connections, boolean isOwner) {
 		for (int i = 0; i < roomSize; ++i) {
 			if ((pos >> i & 1) == 0) {
-				Player newPlayer = new Player(name, shipName, isOwner, connections, i);
+				Player newPlayer = new Player(name, shipName, connections, i);
+				if (isOwner) newPlayer.setOwner();
 				team[i] = newPlayer;
 				pos |= (1<<i);
 				return newPlayer;

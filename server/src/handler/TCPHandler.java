@@ -58,7 +58,7 @@ public class TCPHandler extends Thread {
 		try {
 			while (isRunning) {
 				String s_req = br.readLine();
-				System.out.println(s_req);
+//				System.out.println(s_req);
 				if (s_req == null) continue;
 				JSONObject request = (JSONObject) JSONValue.parse(s_req);
 				
@@ -91,6 +91,7 @@ public class TCPHandler extends Thread {
 						break;
 						
 					case RequestCode.READY_REQ:
+						readyHandler(request);
 						break;
 						
 					case RequestCode.LEAVE_ROOM_REQ:
@@ -109,8 +110,6 @@ public class TCPHandler extends Thread {
 						signUpHanlder(request);
 						break;
 						
-					
-					
 					default: break;
 				}
 			}
@@ -192,12 +191,12 @@ public class TCPHandler extends Thread {
 				
 				else if (isExactRoomPassword(room.getRoomPassword(), roomPass)) {
 					
-						Player newPlayer = room.addMember(memberName, shipName, TCPServer.getConnections(memberName), false);
-	
-						send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.SUCCESS, "room", room.toJSONObject()));
-						String data = makeJSONDataString(ResponseCode.NEW_MEMBER_RES, StatusCode.NONE, "new_member", newPlayer.toJSONObject());
-						this.room = room;
-						sendToRoomMember(memberName, data);
+					Player newPlayer = room.addMember(memberName, shipName, TCPServer.getConnections(memberName), false);
+
+					send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.SUCCESS, "room", room.toJSONObject()));
+					String data = makeJSONDataString(ResponseCode.NEW_MEMBER_RES, StatusCode.NONE, "new_member", newPlayer.toJSONObject());
+					this.room = room;
+					sendToRoomMember(memberName, data);
 				}
 				else {
 					String response;
@@ -218,6 +217,19 @@ public class TCPHandler extends Thread {
 		JSONArray data = (JSONArray) request.get("data");
 		synchronized (room) {
 			sendToRoomMember(sender, makeJSONDataString(ResponseCode.CHAT_RES, StatusCode.NONE, "data", data));
+		}
+	}
+	
+	private void readyHandler(JSONObject request) {
+		int playerId = (int) (long) request.get("player_id");
+		JSONArray dataArr = (JSONArray) request.get("data");
+		
+		synchronized (room) {
+			int status = (int) (long) dataArr.get(1);
+			Player p = room.getMember(playerId);
+			if (status == 0) p.ready(false);
+			else p.ready(true);
+			sendToRoomMember(p.getName(), makeJSONDataString(ResponseCode.READY_RES, StatusCode.NONE, "data", dataArr));
 		}
 	}
 	
@@ -280,6 +292,10 @@ public class TCPHandler extends Thread {
 	 * */
 	private void playRoomHandler(JSONObject request) throws InterruptedException {		
 		synchronized (room) {
+			if (!room.checkReady()) {
+				send(makeJSONDataString(ResponseCode.PLAY_GAME_RES, StatusCode.FAILED, ErrorCode.PLAY_GAME_FAILED, Message.PARTNER_NOT_READY));
+				return;
+			}
 			establishUdpConnections(room);
 			room.setRunning();
 			
@@ -332,7 +348,7 @@ public class TCPHandler extends Thread {
 	private void playerDeadHandler(JSONObject request) throws InterruptedException {
 		int playerId = (int) (long) request.get("player_id");
 		Game game = room.getGame();
-		sendToRoomMember(null, makeJSONDataString(ResponseCode.PLAYER_DIE_RES, StatusCode.SUCCESS, "player_id", playerId));
+		sendToRoomMember(null, makeJSONDataString(ResponseCode.PLAYER_DIE_RES, StatusCode.NONE, "player_id", playerId));
 		if (game == null || !room.isRunning()) {
 			return;
 		}
@@ -351,6 +367,7 @@ public class TCPHandler extends Thread {
 		Game game = room.getGame();
 		if (game == null || !room.isRunning()) return;
 		Element e = game.getElement(enemyId);
+		
 		synchronized (e) {
 			if (!e.isDead()) {
 				game.killEnemy(e);
@@ -361,13 +378,14 @@ public class TCPHandler extends Thread {
 				}
 				
 				synchronized (game) {
+					Thread.sleep(100);
 					if (game.checkEndGame() == 1) {
 						endGameHandler(game, true);
 					} 
 					else if (game.passLevel()) {
 						game.nextLevel();
 						sendToRoomMember(null, makeJSONDataString(ResponseCode.NEW_LEVEL_RES, StatusCode.NONE, "level", room.getGame().getLevel()));
-						Thread.sleep(8000);
+						Thread.sleep(5000);
 						sendNextBatch(game);
 					}
 					else if (game.checkBatch()) {

@@ -11,4 +11,5 @@ public class ErrorCode {
 	public static final int JOIN_ROOM_FAILED = 404;
 	public static final int LEAVE_ROOM_FAILED = 405;
 	public static final int CLEAR_ROOM_FAILED = 406;
+	public static final int PLAY_GAME_FAILED = 407;
 }

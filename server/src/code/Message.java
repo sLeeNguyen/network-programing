@@ -12,5 +12,6 @@ public class Message {
 	public static final String REQUIRE_ROOM_PASS = "Phòng yêu cầu mật khẩu";
 	public static final String ROOM_FULL = "Phòng đã đầy";
 	public static final String ROOM_IS_RUNNING = "Đang trong trận đấu";
+	public static final String PARTNER_NOT_READY = "Đồng đội chưa sẵn sàng";
 	
 }
