@@ -11,6 +11,7 @@ import helpers.CheckAndAlert;
 import helpers.UserInformation;
 import helpers.connect.Client;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -113,12 +114,14 @@ public class LoginController implements Initializable {
 
     @FXML
     void onOpenSignUpPane(MouseEvent event) {
+    	Platform.runLater(() -> usernameSignUpJFX.requestFocus());
     	setPaneVisible(signInVBox, false);
     	setPaneVisible(signUpVBox, true);
     }
     
     @FXML
     void onOpenSignInPane(MouseEvent event) {
+    	Platform.runLater(() -> usernameSignInJFX.requestFocus());
     	setPaneVisible(signInVBox, true);
     	setPaneVisible(signUpVBox, false);
     }
