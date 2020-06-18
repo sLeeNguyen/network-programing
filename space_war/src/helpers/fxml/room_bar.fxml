@@ -1,307 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1095.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<HBox alignment="CENTER_LEFT" prefHeight="58.0" prefWidth="900.0" spacing="50.0" styleClass="root" stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="helpers.controllers.RoomBarController">
    <children>
-      <VBox layoutX="88.0" layoutY="56.0" prefHeight="603.0" prefWidth="952.0" style="-fx-background-color: #686868;">
+      <Label fx:id="roomID" prefWidth="120.0" text="1654894" textFill="WHITE">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER_LEFT" prefHeight="19.0" prefWidth="216.0" spacing="10.0">
          <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="50.0" style="-fx-background-color: transparent;">
-               <children>
-                  <Label prefWidth="100.0" text="ID" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <Label prefWidth="200.0" text="Name" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <Label prefWidth="100.0" text="Size" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <Label prefWidth="100.0" text="Status" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS" />
-               </children>
-               <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-               </padding>
-            </HBox>
-            <ScrollPane hbarPolicy="NEVER" prefHeight="599.0" prefWidth="912.0" style="-fx-background-color: transparent;">
-               <content>
-                  <VBox prefHeight="616.0" prefWidth="925.0" style="-fx-background-color: #000;">
-                     <children>
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="50.0" style="-fx-background-color: transparent;">
-                           <children>
-                              <Label prefWidth="100.0" text="1654894" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="200.0" text="Gamer Pro" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="1/1" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="Running" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <JFXButton focusTraversable="false" prefHeight="46.0" prefWidth="120.0" style="-fx-border-color: #fff; -fx-border-radius: 50px; -fx-background-radius: 50px; -fx-background-color: transparent; -fx-border-width: 2px; -fx-cursor: hand;" text="JOIN" textFill="WHITE">
-                                       <font>
-                                          <Font size="20.0" />
-                                       </font>
-                                    </JFXButton>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="883.0" spacing="50.0" style="-fx-background-color: transparent;">
-                           <children>
-                              <Label prefWidth="100.0" text="1987946" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="200.0" text="Lucas Visco" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="2/3" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="Free" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <JFXButton focusTraversable="false" prefHeight="46.0" prefWidth="120.0" style="-fx-border-color: #fff; -fx-border-radius: 50px; -fx-background-radius: 50px; -fx-background-color: transparent; -fx-border-width: 2px; -fx-cursor: hand;" text="JOIN" textFill="WHITE">
-                                       <font>
-                                          <Font size="20.0" />
-                                       </font>
-                                    </JFXButton>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="883.0" spacing="50.0" style="-fx-background-color: transparent;">
-                           <children>
-                              <Label prefWidth="100.0" text="1987946" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="200.0" text="Lucas Visco" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="2/3" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="Free" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <JFXButton focusTraversable="false" prefHeight="46.0" prefWidth="120.0" style="-fx-border-color: #fff; -fx-border-radius: 50px; -fx-background-radius: 50px; -fx-background-color: transparent; -fx-border-width: 2px; -fx-cursor: hand;" text="JOIN" textFill="WHITE">
-                                       <font>
-                                          <Font size="20.0" />
-                                       </font>
-                                    </JFXButton>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="883.0" spacing="50.0" style="-fx-background-color: transparent;">
-                           <children>
-                              <Label prefWidth="100.0" text="1987946" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="200.0" text="Lucas Visco" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="2/3" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="Free" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <JFXButton focusTraversable="false" prefHeight="46.0" prefWidth="120.0" style="-fx-border-color: #fff; -fx-border-radius: 50px; -fx-background-radius: 50px; -fx-background-color: transparent; -fx-border-width: 2px; -fx-cursor: hand;" text="JOIN" textFill="WHITE">
-                                       <font>
-                                          <Font size="20.0" />
-                                       </font>
-                                    </JFXButton>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="883.0" spacing="50.0" style="-fx-background-color: transparent;">
-                           <children>
-                              <Label prefWidth="100.0" text="1987946" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="200.0" text="Lucas Visco" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="2/3" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="Free" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <JFXButton focusTraversable="false" prefHeight="46.0" prefWidth="120.0" style="-fx-border-color: #fff; -fx-border-radius: 50px; -fx-background-radius: 50px; -fx-background-color: transparent; -fx-border-width: 2px; -fx-cursor: hand;" text="JOIN" textFill="WHITE">
-                                       <font>
-                                          <Font size="20.0" />
-                                       </font>
-                                    </JFXButton>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="883.0" spacing="50.0" style="-fx-background-color: transparent;">
-                           <children>
-                              <Label prefWidth="100.0" text="1987946" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="200.0" text="Lucas Visco" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="2/3" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="Free" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <JFXButton focusTraversable="false" prefHeight="46.0" prefWidth="120.0" style="-fx-border-color: #fff; -fx-border-radius: 50px; -fx-background-radius: 50px; -fx-background-color: transparent; -fx-border-width: 2px; -fx-cursor: hand;" text="JOIN" textFill="WHITE">
-                                       <font>
-                                          <Font size="20.0" />
-                                       </font>
-                                    </JFXButton>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="883.0" spacing="50.0" style="-fx-background-color: transparent;">
-                           <children>
-                              <Label prefWidth="100.0" text="1987946" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="200.0" text="Lucas Visco" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="2/3" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label prefWidth="100.0" text="Free" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                    <JFXButton focusTraversable="false" prefHeight="46.0" prefWidth="120.0" style="-fx-border-color: #fff; -fx-border-radius: 50px; -fx-background-radius: 50px; -fx-background-color: transparent; -fx-border-width: 2px; -fx-cursor: hand;" text="JOIN" textFill="WHITE">
-                                       <font>
-                                          <Font size="20.0" />
-                                       </font>
-                                    </JFXButton>
-                                 </children>
-                              </VBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                     </children>
-                  </VBox>
-               </content>
-            </ScrollPane>
+            <FontAwesomeIconView fx:id="passIcon" fill="WHITE" glyphName="LOCK" size="2em" />
+            <Label fx:id="roomName" prefWidth="200.0" text="Gamer Pro" textFill="WHITE">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+         </children>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+      </HBox>
+      <Label fx:id="capacity" prefWidth="100.0" text="1/1" textFill="WHITE">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="status" prefWidth="100.0" text="Running" textFill="WHITE">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <VBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+         <children>
+            <JFXButton focusTraversable="false" onMouseClicked="#joinRoom" prefHeight="46.0" prefWidth="120.0" styleClass="btn-join" text="JOIN">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </JFXButton>
          </children>
       </VBox>
    </children>
-</AnchorPane>
+   <padding>
+      <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+   </padding>
+</HBox>

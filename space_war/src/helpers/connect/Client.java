@@ -180,6 +180,14 @@ public class Client {
 		
 		return false;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static void sendViewAllRoomRequest() {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 20);
+		
+		pr.println(request.toString());
+	}
 
 	@SuppressWarnings("unchecked")
 	public static void sendRoomCreationRequest(String roomName, String roomOwner, int roomSize, String roomPass, String shipName) {
@@ -199,6 +207,18 @@ public class Client {
 		JSONObject request = new JSONObject();
 		request.put("req_code", 22);
 		request.put("room_name", roomName);
+		request.put("member_name", memberName);
+		request.put("ship", shipName);
+		if (roomPass != null && !roomPass.isEmpty()) request.put("room_pass", roomPass);
+		
+		pr.println(request.toJSONString());	
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void sendJoinRoomRequest(int ID, String roomPass, String memberName, String shipName) {
+		JSONObject request = new JSONObject();
+		request.put("req_code", 22);
+		request.put("room_id", ID);
 		request.put("member_name", memberName);
 		request.put("ship", shipName);
 		if (roomPass != null && !roomPass.isEmpty()) request.put("room_pass", roomPass);

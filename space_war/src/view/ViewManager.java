@@ -18,6 +18,7 @@ import helpers.UserInformation;
 import helpers.code.ServerCode;
 import helpers.connect.Client;
 import helpers.connect.Client.TCPClient;
+import helpers.controllers.ListRoomViewController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -67,6 +68,7 @@ public class ViewManager {
     private static final int MENU_BUTTONS_START_Y = 180;
     
     public static UserInformation user;
+    public static SHIP yourShip;
     
     private GamePlay game;
     private AnchorPane root;
@@ -91,7 +93,6 @@ public class ViewManager {
     
     TCPClient tcpHandler;
     
-    private SHIP yourShip;
     private PlayerInfor[] playersView;
     private PlayerInfor you;
     private int curr_size;
@@ -407,10 +408,12 @@ public class ViewManager {
     private void createButtonOfRoomSubScene() {
     	SpaceWarButton createRoomButton = new SpaceWarButton("NEW ROOM"); 
     	SpaceWarButton joinRoomButton = new SpaceWarButton("JOIN ROOM"); 
-    	createRoomButton.changeButton(); createRoomButton.setLayoutX(175); createRoomButton.setLayoutY(120);
-    	joinRoomButton.changeButton();	joinRoomButton.setLayoutX(175); joinRoomButton.setLayoutY(200);
+    	SpaceWarButton viewAllRoomButton = new SpaceWarButton("ALL ROOM");
+    	createRoomButton.changeButton(); createRoomButton.setLayoutX(175); createRoomButton.setLayoutY(100);
+    	joinRoomButton.changeButton();	joinRoomButton.setLayoutX(175); joinRoomButton.setLayoutY(180);
+    	viewAllRoomButton.changeButton(); viewAllRoomButton.setLayoutX(175); viewAllRoomButton.setLayoutY(260);
     	
-    	roomSubScene.getPane().getChildren().addAll(createRoomButton, joinRoomButton);
+    	roomSubScene.getPane().getChildren().addAll(createRoomButton, joinRoomButton, viewAllRoomButton);
     	
     	createRoomButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
@@ -423,16 +426,24 @@ public class ViewManager {
 			}
 		});
     	
-    	joinRoomButton.setOnAction(new EventHandler<ActionEvent>() {
+    	joinRoomButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
 			@Override
-			public void handle(ActionEvent event) {
+			public void handle(MouseEvent event) {
 				JoinRoomSubScene joinRoomInfor = new JoinRoomSubScene(50, 50);
 				roomSubScene.getPane().getChildren().clear();
 				roomSubScene.getPane().getChildren().add(joinRoomInfor);
 				setButtonOfJoinRoom(joinRoomInfor);
 			}
 		});
+    	
+    	viewAllRoomButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent arg0) {
+				Client.sendViewAllRoomRequest();
+			}
+    	});
     }
     
     private void setButtonOfRoomInfor(RoomCreationSubScene roomInfor) {
@@ -592,6 +603,7 @@ public class ViewManager {
     	
     	public void reset() {
     		owner = false;
+    		ship = null;
     		box.getChildren().clear();
     		getChildren().clear();
     	}
@@ -810,6 +822,10 @@ public class ViewManager {
     					joinRoomHandler(json_data);
     					break;
     					
+        			case ServerCode.VIEW_ALL_ROOM_RES:
+        				viewAllRoomHandler(json_data);
+        				break;
+    					
     				case ServerCode.NEW_MEMBER_RES:
     					newMemberHandler(json_data);
     					break;
@@ -932,7 +948,46 @@ public class ViewManager {
 			chatFrame.getChildren().add(createMessageView(null, String.format("%s has joined!", (String) newMember.get("name"))));
 		}
 	}
-
+	
+	private void viewAllRoomHandler(JSONObject response) {
+		int status = (int) (long) response.get("status");
+		
+		if (status == 1) {
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("/helpers/fxml/list_room_view.fxml"));
+				Node node = loader.load();
+				node.setLayoutX(200); node.setLayoutY(50);
+				
+				ListRoomViewController rvc = loader.getController();
+				
+				mainPane.getChildren().forEach(child -> child.setVisible(false));
+				mainPane.getChildren().add(node);
+				
+				JSONArray listRoom = (JSONArray) response.get("list_room");
+				for (int i = 0; i < listRoom.size(); ++i) {
+					JSONArray r = (JSONArray) listRoom.get(i);
+					int roomID = (int) (long) r.get(0);
+					String roomName = (String) r.get(1);
+					String capacity = (String) r.get(2);
+					boolean isRunning = (boolean) r.get(3);
+					boolean hasPass = (boolean) r.get(4);
+					rvc.addRoomRow(Integer.toString(roomID), roomName, capacity, isRunning, hasPass);
+				}
+				
+				SpaceWarButton backBtn = new SpaceWarButton("BACK");
+				backBtn.setLayoutX(200); backBtn.setLayoutY(700);
+				mainPane.getChildren().add(backBtn);
+				backBtn.setOnMouseClicked(e -> {
+					mainPane.getChildren().removeAll(node, backBtn);
+					mainPane.getChildren().forEach(child -> child.setVisible(true));
+				});
+				
+			} catch (IOException e) {
+				//pass
+			}
+		}
+	}
+	
 	private void joinRoomHandler(JSONObject response) {
 		long status = (long) response.get("status");
 		
@@ -966,7 +1021,7 @@ public class ViewManager {
 				}
 				else {
 					playersView[playerId].setShipView(new Ship(shipE, EType.ANOTHER_PLAYER, 12, 100, 75, playerId), playerName);
-					if (status == 1) playersView[playerId].ready();
+					if (readied == 1) playersView[playerId].ready();
 				}
 			}
 			playersView[ownerId].setOwner(true);
@@ -993,7 +1048,7 @@ public class ViewManager {
 			playersView[2] = new PlayerInfor();
 			
 			curr_size = 1;
-			createAndSetRoomUI(this.roomId, (String) room.get("room_name"), (long) room.get("room_size"), (long) room.get("has_pass") == 1);
+			createAndSetRoomUI(this.roomId, (String) room.get("room_name"), (long) room.get("room_size"), (boolean) room.get("has_pass"));
 			chatFrame.getChildren().add(createMessageView(null, "You have created the room!"));
 		}
 	}

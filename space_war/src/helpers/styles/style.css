@@ -1,0 +1,72 @@
+.root {
+	-fx-background-color: transparent;
+}
+
+.root:hover {
+	-fx-background-color: #0e2450de;
+}
+
+.btn-join {
+	-fx-border-color: white;
+	-fx-border-radius: 50px;
+	-fx-background-radius: 50px;
+	-fx-background-color: transparent;
+	-fx-border-width: 2px;
+	-fx-cursor: hand;
+	-fx-text-fill: white;
+}
+
+.btn-join:hover {
+	-fx-background-color: white;
+	-fx-text-fill: black;
+}
+
+.refresh-icon {
+	-fx-cursor: hand;
+	-fx-fill: white;
+}
+
+.refresh-icon:hover {
+	-fx-fill: #d60b0b;
+}
+
+#scrollPane{
+    -fx-background-color: #222222d4;
+    -fx-padding: 15 5 8 15;
+}
+#scrollPane >.viewport{
+    -fx-background-color: transparent;
+}
+
+#scrollPane .scroll-bar:vertical{
+    -fx-background-color:inherit;
+}
+
+#scrollPane .scroll-bar:vertical .track{
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+
+}
+#scrollPane .scroll-bar:vertical .increment-button,
+#scrollPane .scroll-bar:vertical .decrement-button{
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
+
+}
+
+#scrollPane  .scroll-bar .increment-arrow,
+#scrollPane  .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+#scrollPane .scroll-bar:vertical .thumb {
+    -fx-background-color: transparent;
+
+}
+#scrollPane:hover .scroll-bar:vertical .thumb{
+    -fx-background-color: #ffffff9e;
+    -fx-background-insets: 4, 0, 0;
+    -fx-background-radius: 2em;
+}
