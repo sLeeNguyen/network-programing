@@ -22,6 +22,7 @@ public class Game {
 	private int numOfDead;
 	
 	private int numOfPlayersAlive;
+	private int countID;
 	
 	public Game(int players) {
 		this.numOfPlayersAlive = players;
@@ -31,6 +32,7 @@ public class Game {
 		this.numInBatch = 10;
 		this.numOfElements = NUM_BASE;
 		this.numOfDead = 0;
+		this.countID = 0;
 		generateElements();
 	}
 	
@@ -43,7 +45,7 @@ public class Game {
 			// Element(int id, double layoutX, double layoutY, int speed, int color, int kind, int worth, int skill, int blood)
 			int speed = genInt(SPEED_BASE, boundSpeed);
 			int skill = getSkill(speed);
-			elements[i] = new Element(i, genInt(40, 1100), -genInt(100, 2000), speed , genInt(0, COLOR_SIZE), genInt(0, NUM_KIND),
+			elements[i] = new Element(countID++, genInt(40, 1100), -genInt(100, 2000), speed , genInt(0, COLOR_SIZE), genInt(0, NUM_KIND),
 					worth, skill, (level + 1)>>1);
 		}
 	}
@@ -90,7 +92,7 @@ public class Game {
 		level++;
 		batch = 0;
 		numOfDead = 0;
-		numOfElements = NUM_BASE ;
+		numOfElements = NUM_BASE;// + level*MULTI_BASE;
 		generateElements();
 	}
 	
@@ -110,7 +112,8 @@ public class Game {
 		return low + random.nextInt(bound);
 	}
 	
-	public Element getElement(int pos) {
-		return elements[pos];
+	public Element getElement(int ID) {
+		if (ID < countID - numOfElements) return null;
+		return elements[ID % numOfElements];
 	}
 }
