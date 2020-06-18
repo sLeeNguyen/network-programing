@@ -262,14 +262,27 @@ public class Room {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public JSONObject roomJSONSimpleInfo() {
+	public JSONObject roomJSONObjectSimpleInfo() {
 		JSONObject roomJSON = new JSONObject();
 		
 		roomJSON.put("room_id", id);
 		roomJSON.put("room_name", roomName);
-		roomJSON.put("has_pass", roomPassword == null ? 0 : 1);
+		roomJSON.put("has_pass", roomPassword != null ? true : false);
 		roomJSON.put("room_size", roomSize);
 
 		return roomJSON;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONArray toJSONArray() {
+		JSONArray arr = new JSONArray();
+		
+		arr.add(id);
+		arr.add(roomName);
+		arr.add(getListMember().size() + "/" + roomSize);
+		arr.add(isRunning);
+		arr.add(roomPassword != null ? true : false);
+		
+		return arr;
 	}
 }

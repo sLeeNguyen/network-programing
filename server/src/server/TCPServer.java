@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.simple.JSONArray;
+
 import handler.TCPHandler;
 import helpers.PairConnection;
 import helpers.Room;
@@ -66,6 +68,17 @@ public class TCPServer extends Thread {
 	
 	public static int getListRoomSize() {
 		return listRoom.size();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static JSONArray getRoomArrayInfor() {
+		JSONArray roomArr = new JSONArray();
+		
+		for (Room room: listRoom.values()) {
+			roomArr.add(room.toJSONArray());
+		}
+		
+		return roomArr;
 	}
 	
 	public static void addTCPClientConnection(String key, TCPHandler tcpHandler) {

@@ -82,6 +82,10 @@ public class TCPHandler extends Thread {
 						joinRoomHandler(request);
 						break;
 						
+					case RequestCode.VIEW_ALL_ROOM_REQ:
+						getAllRoomHandler(request);
+						break;
+						
 					case RequestCode.PLAYER_DIE_REQ:
 						playerDeadHandler(request);
 						break;
@@ -151,6 +155,9 @@ public class TCPHandler extends Thread {
 		}
 	}
 	
+	private void getAllRoomHandler(JSONObject request) {
+		send(makeJSONDataString(ResponseCode.VIEW_ALL_ROOM_RES, StatusCode.SUCCESS, "list_room", TCPServer.getRoomArrayInfor()));
+	}
 	
 	private void roomCreationHandler(JSONObject request) {
 		String roomName = (String) request.get("room_name");
@@ -168,7 +175,7 @@ public class TCPHandler extends Thread {
 			Room newRoom = new Room(roomId, roomName, roomPass, roomSize);
 			newRoom.addMember(roomOwner, shipName, TCPServer.getConnections(roomOwner), true);
 			TCPServer.addNewRoom(roomId, newRoom);
-			send(makeJSONDataString(ResponseCode.ROOM_CREATION_RES, StatusCode.SUCCESS, "room", newRoom.roomJSONSimpleInfo()));
+			send(makeJSONDataString(ResponseCode.ROOM_CREATION_RES, StatusCode.SUCCESS, "room", newRoom.roomJSONObjectSimpleInfo()));
 			this.room = newRoom;
 		}
 		else {
@@ -177,12 +184,16 @@ public class TCPHandler extends Thread {
 	}
 	
 	private void joinRoomHandler(JSONObject request) {
+		Long roomID = (Long) request.get("room_id");
 		String roomName = (String) request.get("room_name");
 		String memberName = (String) request.get("member_name");
 		String roomPass = (String) request.get("room_pass");
 		String shipName = (String) request.get("ship");
 		
-		Room room = TCPServer.hasRoom(roomName);
+		Room room = null;
+		if (roomID != null) room = TCPServer.getRoomById(roomID.intValue());
+		else room = TCPServer.hasRoom(roomName);
+		
 		if (room != null) {
 			synchronized (room) {
 				if (room.isRunning()) send(makeJSONDataString(ResponseCode.JOIN_ROOM_RES, StatusCode.FAILED, ErrorCode.JOIN_ROOM_FAILED, Message.ROOM_IS_RUNNING));

@@ -4,6 +4,7 @@ public class RequestCode {
 	public static final int SIGNIN_REQ = 11;
 	public static final int SIGNUP_REQ = 12;
 	
+	public static final int VIEW_ALL_ROOM_REQ = 20;
 	public static final int ROOM_CREATION_REQ = 21;
 	public static final int JOIN_ROOM_REQ = 22;
 	public static final int PLAY_GAME_REQ = 23;
