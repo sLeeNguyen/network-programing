@@ -18,6 +18,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import helpers.CheckAndAlert;
+import helpers.code.RequestCode;
 
 public class Client {
 //	private static final String SERVER_IP = "192.168.0.112";
@@ -109,10 +110,20 @@ public class Client {
 		}
 	}
 	
+	
+	@SuppressWarnings("unchecked")
+	public static void sendUserExitRequest(String username) {
+		JSONObject request = new JSONObject();
+		request.put("req_code", RequestCode.USER_EXIT);
+		request.put("username", username);
+		
+		pr.println(request.toString());
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static Integer sendLoginRequestAndHandleResponse(String username, String password) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 11);
+		request.put("req_code", RequestCode.SIGNIN_REQ);
 		request.put("username", username);
 		request.put("password", password);
 	
@@ -149,7 +160,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static boolean sendRegistrationRequestAndHandleResponse(String username, String password) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 12);
+		request.put("req_code", RequestCode.SIGNUP_REQ);
 		request.put("username", username);
 		request.put("password", password);
 		
@@ -184,7 +195,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendViewAllRoomRequest() {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 20);
+		request.put("req_code", RequestCode.VIEW_ALL_ROOM_REQ);
 		
 		pr.println(request.toString());
 	}
@@ -192,7 +203,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendRoomCreationRequest(String roomName, String roomOwner, int roomSize, String roomPass, String shipName) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 21);
+		request.put("req_code", RequestCode.ROOM_CREATION_REQ);
 		request.put("room_name", roomName);
 		request.put("room_owner", roomOwner);
 		request.put("size", roomSize);
@@ -205,7 +216,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendJoinRoomRequest(String roomName, String roomPass, String memberName, String shipName) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 22);
+		request.put("req_code", RequestCode.JOIN_ROOM_REQ);
 		request.put("room_name", roomName);
 		request.put("member_name", memberName);
 		request.put("ship", shipName);
@@ -217,7 +228,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendJoinRoomRequest(int ID, String roomPass, String memberName, String shipName) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 22);
+		request.put("req_code", RequestCode.JOIN_ROOM_REQ);
 		request.put("room_id", ID);
 		request.put("member_name", memberName);
 		request.put("ship", shipName);
@@ -229,7 +240,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendPlayGameRequest() {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 23);
+		request.put("req_code", RequestCode.PLAY_GAME_REQ);
 		
 		pr.println(request.toJSONString());
 	}
@@ -241,7 +252,7 @@ public class Client {
 		data.add(message);
 		
 		JSONObject request = new JSONObject();
-		request.put("req_code", 24);
+		request.put("req_code", RequestCode.CHAT_REQ);
 		request.put("sender", sender);
 		request.put("data", data);
 		
@@ -252,7 +263,7 @@ public class Client {
 	public static void sendReadyRequest(int playerId, int status) {
 		// 0: unready, 1: ready
 		JSONObject request = new JSONObject();
-		request.put("req_code", 25);
+		request.put("req_code", RequestCode.READY_REQ);
 		JSONArray dataArr = new JSONArray();
 		dataArr.add(playerId);
 		dataArr.add(status);
@@ -265,7 +276,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendLeaveRoomRequest(int playerId) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 26);
+		request.put("req_code", RequestCode.LEAVE_ROOM_REQ);
 		request.put("player_id", playerId);
 		
 		pr.println(request.toJSONString());
@@ -274,7 +285,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendClearRoomRequest() {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 27);
+		request.put("req_code", RequestCode.CLEAR_ROOM_REQ);
 		
 		pr.println(request.toJSONString());
 	}
@@ -282,7 +293,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendPlayerDeadRequest(int playerId) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 42);
+		request.put("req_code", RequestCode.PLAYER_DIE_REQ);
 		request.put("player_id", playerId);
 		
 		pr.println(request.toJSONString());
@@ -291,7 +302,7 @@ public class Client {
 	@SuppressWarnings("unchecked")
 	public static void sendEnemyDeadRequest(int enemyId, int killerId) {
 		JSONObject request = new JSONObject();
-		request.put("req_code", 43);
+		request.put("req_code", RequestCode.ENEMY_DIE_REQ);
 		request.put("enemy_id", enemyId);
 		request.put("killer_id", killerId);
 		
@@ -306,7 +317,7 @@ public class Client {
 		j_array.add(shipId);
 		j_array.add(layoutX);
 		j_array.add(action);
-		request.put("req_code", 41);
+		request.put("req_code", RequestCode.PLAYER_ACTION_REQ);
 		request.put("player_id", shipId);
 		request.put("room_id", roomId);
 		request.put("data", j_array);
@@ -324,7 +335,7 @@ public class Client {
 			}
 		
 		JSONObject request = new JSONObject();
-		request.put("req_code", 60);
+		request.put("req_code", RequestCode.UDP_CONNECTION_REQ);
 		request.put("room_id", roomId);
 		request.put("member_name", name);
 		

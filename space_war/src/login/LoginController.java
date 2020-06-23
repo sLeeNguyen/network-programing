@@ -66,6 +66,7 @@ public class LoginController implements Initializable {
     	setUpTitleBar();
     	setElementLayout();
     	setPaneVisible(signInVBox, true);
+    	Platform.runLater(() -> signInVBox.requestFocus());
 	}
     
     private void setUpTitleBar() {

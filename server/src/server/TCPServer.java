@@ -100,4 +100,8 @@ public class TCPServer extends Thread {
 	public static PairConnection getConnections(String key) {
 		return listConnection.get(key);
 	}
+	
+	public static void deleteConnections(String key) {
+		listConnection.remove(key);
+	}
 }

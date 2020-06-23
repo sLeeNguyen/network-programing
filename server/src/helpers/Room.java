@@ -210,6 +210,28 @@ public class Room {
 		return p;
 	}
 	
+	synchronized public Player removePlayer(String name) {
+		Player p = null;
+		for (Player player: team) if (player != null && player.getName().equals(name)) 
+			p = player;
+		
+		try {
+			team[p.getPlayerId()] = null;
+			pos ^= (1<<p.getPlayerId());
+			
+			if (!isEmpty()) {
+				for (Player player: team) if (player != null) {
+					player.setOwner();
+					break;
+				}
+			}
+		} catch (Exception e) {
+			//pass
+		}
+		
+		return p;
+	}
+	
 	public Player getMember(int index) {
 		if (index < 0 || index >= team.length) return null;
 		return team[index];

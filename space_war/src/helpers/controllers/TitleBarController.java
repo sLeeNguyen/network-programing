@@ -5,12 +5,14 @@ import java.util.ResourceBundle;
 
 import helpers.CheckAndAlert;
 import helpers.MoveWindow;
+import helpers.connect.Client;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import view.ViewManager;
 
 
 public class TitleBarController implements Initializable {
@@ -25,7 +27,10 @@ public class TitleBarController implements Initializable {
 
     @FXML
     void onCancel(MouseEvent event) {
-    	if (CheckAndAlert.alertConfirmMessage("Bạn có chắc chắn muốn thoát?")) {
+    	if (CheckAndAlert.alertConfirmMessage("Do you want to exit?")) {
+    		if (ViewManager.user != null) {
+    			Client.sendUserExitRequest(ViewManager.user.getName());
+    		}
     		Platform.exit();
     		System.exit(0);
     	}

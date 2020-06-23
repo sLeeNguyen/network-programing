@@ -248,8 +248,13 @@ public class ViewManager {
         exitButton.setOnAction(new EventHandler<ActionEvent>() {
         
         	public void handle(ActionEvent event) {
-                mainStage.close();
-                System.exit(1);
+        		if (CheckAndAlert.alertConfirmMessage("Do you want to exit?")) {
+            		if (ViewManager.user != null) {
+            			Client.sendUserExitRequest(ViewManager.user.getName());
+            		}
+            		Platform.exit();
+            		System.exit(0);
+            	}
             }
         });
     }
@@ -873,6 +878,7 @@ public class ViewManager {
     	int status = (int) (long) json_data.get("status");
     	
     	if (status == 1) {
+    		roomId = -1;
     		mainPane.getChildren().clear();
     		createAll();
     		showSubScene(roomSubScene);
@@ -898,6 +904,7 @@ public class ViewManager {
     	int status = (int) (long) json_data.get("status");
     	
     	if (status == 1) {
+    		roomId = -1;
     		mainPane.getChildren().clear();
     		createAll();
     		showSubScene(roomSubScene);
@@ -1043,7 +1050,7 @@ public class ViewManager {
 			this.roomId = (int)((long) room.get("room_id"));
 			
 			playersView = new PlayerInfor[3];
-			playersView[0] = you = new PlayerInfor(new Ship(yourShip, EType.YOU, 35, 100, 75, 0), user.getName()); you.setOwner(true);
+			playersView[0] = you = new PlayerInfor(new Ship(yourShip, EType.YOU, 40, 100, 75, 0), user.getName()); you.setOwner(true);
 			playersView[1] = new PlayerInfor();
 			playersView[2] = new PlayerInfor();
 			

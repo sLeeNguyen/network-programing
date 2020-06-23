@@ -114,6 +114,10 @@ public class TCPHandler extends Thread {
 						signUpHanlder(request);
 						break;
 						
+					case RequestCode.USER_EXIT:
+						userExitHandler(request);
+						break;
+						
 					default: break;
 				}
 			}
@@ -132,6 +136,11 @@ public class TCPHandler extends Thread {
 	private void signInHandler(JSONObject request) throws SQLException, IOException {
 		String username = (String) request.get("username");
 		String password = (String) request.get("password");
+		
+		if (TCPServer.getConnections(username) != null) {
+			send(makeJSONDataString(ResponseCode.SIGNIN_RES, StatusCode.FAILED, ErrorCode.SIGNIN_FAILED, Message.ACCOUNT_BEING_USED));
+			return;
+		}
 		
 		int id = checkSignIn(username, password);
 		if (id != 0) {
@@ -153,6 +162,24 @@ public class TCPHandler extends Thread {
 			send(makeJSONDataString(ResponseCode.SIGNUP_RES, StatusCode.FAILED, ErrorCode.SIGNUP_FAILED, Message.ACCOUNT_EXISTS));
 			closeHandler();
 		}
+	}
+	
+	private void userExitHandler(JSONObject request) {
+		String username = (String) request.get("username");
+		
+		if (room != null) {
+			synchronized (room) {
+				Player p = room.removePlayer(username);
+				if (p != null) sendToRoomMember(null, makeJSONDataString(ResponseCode.LEAVE_ROOM_NOTIFY_RES, StatusCode.NONE, "player_id", p.getPlayerId()));
+				if (room.isEmpty()) TCPServer.deleteRoom(room.getRoomId());
+				else if (p.isOwner()) {
+					sendToRoomMember(null, makeJSONDataString(ResponseCode.SET_NEW_OWNER_RES, StatusCode.NONE, "owner_id", room.getRoomOwner().getPlayerId()));
+				}
+			}
+		}
+		
+		closeHandler();
+		TCPServer.deleteConnections(username);
 	}
 	
 	private void getAllRoomHandler(JSONObject request) {
@@ -378,6 +405,7 @@ public class TCPHandler extends Thread {
 		Game game = room.getGame();
 		if (game == null || !room.isRunning()) return;
 		Element e = game.getElement(enemyId);
+		if (e == null) return;
 		
 		synchronized (e) {
 			if (!e.isDead()) {
@@ -436,6 +464,11 @@ public class TCPHandler extends Thread {
 	 * 
 	 * database(insert, update, delete), check v.v...
 	 * */
+	
+	private Socket getSocket() {
+		return socket;
+	}
+	
 	private void send(String data) {
 		pr.println(data);
 	}

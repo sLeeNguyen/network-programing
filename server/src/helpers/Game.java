@@ -92,7 +92,7 @@ public class Game {
 		level++;
 		batch = 0;
 		numOfDead = 0;
-		numOfElements = NUM_BASE;// + level*MULTI_BASE;
+		numOfElements = NUM_BASE + level*MULTI_BASE;
 		generateElements();
 	}
 	

@@ -8,7 +8,7 @@ public class Resource {
 			{"/resources/enemy/enemyRed1.png", "/resources/enemy/enemyRed2.png", "/resources/enemy/enemyRed3.png", "/resources/enemy/enemyRed4.png", "/resources/enemy/enemyRed5.png"}}; 
 	public static final int ENEMY_HEIGHT = 84;
 	public static final int ENEMY_WIDTH = 100;
-	public static final int ENEMY_RADIUS = 35;
+	public static final int ENEMY_RADIUS = 43;
 	
 	public static final String[] LEVEL_PATH = {"/resources/levels/level1.png", "/resources/levels/level2.png", "/resources/levels/level3.png", "/resources/levels/level4.png", "/resources/levels/level5.png"};
 	public static final String WIN_GAME_PATH = "/resources/levels/wingame.png";

@@ -1,4 +1,4 @@
-package code;
+package helpers.code;
 
 public class RequestCode {
 	public static final int USER_EXIT = 10;
