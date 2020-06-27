@@ -25,7 +25,7 @@ public class Ship extends Element {
     	this.shipE = shipE;
     	this.skills = SHOOT | SHIELD;
     	this.blood = 1;
-    	this.numShields = 100;
+    	this.numShields = 5;
     	this.normalSpeed = 5;
     	this.maxSpeed = 7;
     }
