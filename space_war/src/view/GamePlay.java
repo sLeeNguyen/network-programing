@@ -241,7 +241,7 @@ public class GamePlay {
 			return;
 		}
 		for (Ship ship: ships) {
-			if (ship != null) {
+			if (ship != null && !ship.isDead()) {
 				if (checkCollide(ship, enemy)) {
     				enemy.dead(true);
     				enemy.deleteShield();
@@ -277,7 +277,7 @@ public class GamePlay {
     	b.moveDown(10);
     	if (b.getLayoutY() > GAME_HEIGHT) b.dead(true);
     	for (Ship player: ships) {
-    		if (player != null) {
+    		if (player != null && !player.isDead()) {
 	    		if (checkCollide(b, player)) {
 	    			b.dead(true);
 	    			Shield playerShield = player.useShield();
@@ -286,7 +286,7 @@ public class GamePlay {
 	    			}
 	    			else if (player.decreaseBlood() <= 0 && player.getType() == EType.YOU) {
 	    				Client.sendPlayerDeadRequest(yourShip.getID());
-	    			}
+	    			}	
 	    		}
     		}
     	}

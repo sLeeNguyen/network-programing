@@ -107,9 +107,10 @@ public class ViewManager {
     	mainPane.setPrefHeight(HEIGHT);
     	mainPane.setPrefWidth(WIDTH);
     	
-    	setUpAll();
     	yourShip = SHIP.BLUE1;
-        
+    	roomId = -1;
+    	setUpAll();
+    	
         mainScene = new Scene(root, WIDTH, HEIGHT + 40);
         mainStage = new Stage();
         mainStage.setScene(mainScene);
@@ -847,6 +848,20 @@ public class ViewManager {
     	});
     	
     	tcpHandler.start();
+    	
+    	if (roomId != -1) {
+    		if (!you.isOwner()) {
+        		unreadyBtn.setVisible(false);
+        		readyBtn.setVisible(true);
+        		leaveBtn.setDisable(false);
+    		}
+    		
+    		for (PlayerInfor pi: playersView) {
+    			if (pi.getShip() != null && !pi.isOwner()) {
+    				pi.unReady();
+    			}
+    		}
+    	}
     }
 
     
