@@ -52,7 +52,7 @@ public class Game {
 	
 	private int getSkill(int speed) {
 		int skill = 0;
-		if (level > 2 && speed < 5) skill |= Element.SHOOT;
+		if (level > 2 && speed <= MAX_LEVEL) skill |= Element.SHOOT;
 		if (level > 3) skill |= Element.SHIELD;
 		
 		return skill;

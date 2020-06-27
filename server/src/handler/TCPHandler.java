@@ -459,16 +459,6 @@ public class TCPHandler extends Thread {
 	}
 	/*********************** End Game ***********************/
 	
-	/**
-	 * Helper
-	 * 
-	 * database(insert, update, delete), check v.v...
-	 * */
-	
-	private Socket getSocket() {
-		return socket;
-	}
-	
 	private void send(String data) {
 		pr.println(data);
 	}

@@ -98,6 +98,7 @@ public class Room {
 			connections.setUdpConnection(null);
 			score = 0;
 			numOfEnemiesKilled = 0;
+			if (!isOwner) readied = false;
 		}
 		
 		@SuppressWarnings("unchecked")

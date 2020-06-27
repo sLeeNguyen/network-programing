@@ -33,7 +33,7 @@ public class Element {
 		this.skills = skill;
 		this.blood = blood;
 		this.isDead = false;
-		if ((skills & SHOOT) != 0) bulletDelay = 230 + random.nextInt(50);
+		if ((skills & SHOOT) != 0) bulletDelay = 250 + random.nextInt(50);
 	}
 	
 	public boolean isDead() {
